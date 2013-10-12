@@ -3,6 +3,9 @@
 //  GraphDecomposition
 //
  
+/**
+ * Represents list of nodes and each three following nodes makes triangle (exception is last three 'not finished' triangle nodes)
+ */
 
 #include "GDTriangleList.h"
 #include <stdio.h>
@@ -221,11 +224,9 @@ void GDTriangleListPrint(GDTriangleListRef triangleList) {
   assert(triangleList != NULL);
   
   printf("\n");
-  
   for ( unsigned int valueIdx = 0; valueIdx < triangleList->count; valueIdx++ ) {
     printf("%d \t", triangleList->values[valueIdx]);
   }
-  
   printf("\n");
   
 }
