@@ -1,0 +1,277 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		665718AB1809C57700118EF3 /* GDAlgorithmTests.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718A21809C57700118EF3 /* GDAlgorithmTests.c */; };
+		665718AC1809C57700118EF3 /* GDDefines.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718A31809C57700118EF3 /* GDDefines.c */; };
+		665718AD1809C57700118EF3 /* GDExplorationStack.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718A41809C57700118EF3 /* GDExplorationStack.c */; };
+		665718AE1809C57700118EF3 /* GDExplorer.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718A51809C57700118EF3 /* GDExplorer.c */; };
+		665718AF1809C57700118EF3 /* GDGraph.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718A61809C57700118EF3 /* GDGraph.c */; };
+		665718B01809C57700118EF3 /* GDMatrix.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718A71809C57700118EF3 /* GDMatrix.c */; };
+		665718B11809C57700118EF3 /* GDSolution.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718A81809C57700118EF3 /* GDSolution.c */; };
+		665718B21809C57700118EF3 /* GDTriangleList.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718A91809C57700118EF3 /* GDTriangleList.c */; };
+		665718B31809C57700118EF3 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718AA1809C57700118EF3 /* main.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		6657188C1809C51500118EF3 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		6657188E1809C51500118EF3 /* GraphDecomposition */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = GraphDecomposition; sourceTree = BUILT_PRODUCTS_DIR; };
+		6657189A1809C57700118EF3 /* GDAlgorithmTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDAlgorithmTests.h; sourceTree = SOURCE_ROOT; };
+		6657189B1809C57700118EF3 /* GDDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDDefines.h; sourceTree = SOURCE_ROOT; };
+		6657189C1809C57700118EF3 /* GDExplorationStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDExplorationStack.h; sourceTree = SOURCE_ROOT; };
+		6657189D1809C57700118EF3 /* GDExplorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDExplorer.h; sourceTree = SOURCE_ROOT; };
+		6657189E1809C57700118EF3 /* GDGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDGraph.h; sourceTree = SOURCE_ROOT; };
+		6657189F1809C57700118EF3 /* GDMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDMatrix.h; sourceTree = SOURCE_ROOT; };
+		665718A01809C57700118EF3 /* GDSolution.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDSolution.h; sourceTree = SOURCE_ROOT; };
+		665718A11809C57700118EF3 /* GDTriangleList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDTriangleList.h; sourceTree = SOURCE_ROOT; };
+		665718A21809C57700118EF3 /* GDAlgorithmTests.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDAlgorithmTests.c; sourceTree = SOURCE_ROOT; };
+		665718A31809C57700118EF3 /* GDDefines.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDDefines.c; sourceTree = SOURCE_ROOT; };
+		665718A41809C57700118EF3 /* GDExplorationStack.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDExplorationStack.c; sourceTree = SOURCE_ROOT; };
+		665718A51809C57700118EF3 /* GDExplorer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDExplorer.c; sourceTree = SOURCE_ROOT; };
+		665718A61809C57700118EF3 /* GDGraph.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDGraph.c; sourceTree = SOURCE_ROOT; };
+		665718A71809C57700118EF3 /* GDMatrix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDMatrix.c; sourceTree = SOURCE_ROOT; };
+		665718A81809C57700118EF3 /* GDSolution.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDSolution.c; sourceTree = SOURCE_ROOT; };
+		665718A91809C57700118EF3 /* GDTriangleList.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDTriangleList.c; sourceTree = SOURCE_ROOT; };
+		665718AA1809C57700118EF3 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6657188B1809C51500118EF3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		665718851809C51500118EF3 = {
+			isa = PBXGroup;
+			children = (
+				665718901809C51500118EF3 /* GraphDecomposition */,
+				6657188F1809C51500118EF3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		6657188F1809C51500118EF3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6657188E1809C51500118EF3 /* GraphDecomposition */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		665718901809C51500118EF3 /* GraphDecomposition */ = {
+			isa = PBXGroup;
+			children = (
+				6657189B1809C57700118EF3 /* GDDefines.h */,
+				665718A31809C57700118EF3 /* GDDefines.c */,
+				6657189A1809C57700118EF3 /* GDAlgorithmTests.h */,
+				665718A21809C57700118EF3 /* GDAlgorithmTests.c */,
+				6657189C1809C57700118EF3 /* GDExplorationStack.h */,
+				665718A41809C57700118EF3 /* GDExplorationStack.c */,
+				6657189D1809C57700118EF3 /* GDExplorer.h */,
+				665718A51809C57700118EF3 /* GDExplorer.c */,
+				6657189E1809C57700118EF3 /* GDGraph.h */,
+				665718A61809C57700118EF3 /* GDGraph.c */,
+				6657189F1809C57700118EF3 /* GDMatrix.h */,
+				665718A71809C57700118EF3 /* GDMatrix.c */,
+				665718A01809C57700118EF3 /* GDSolution.h */,
+				665718A81809C57700118EF3 /* GDSolution.c */,
+				665718A11809C57700118EF3 /* GDTriangleList.h */,
+				665718A91809C57700118EF3 /* GDTriangleList.c */,
+				665718AA1809C57700118EF3 /* main.c */,
+			);
+			path = GraphDecomposition;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6657188D1809C51500118EF3 /* GraphDecomposition */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 665718971809C51500118EF3 /* Build configuration list for PBXNativeTarget "GraphDecomposition" */;
+			buildPhases = (
+				6657188A1809C51500118EF3 /* Sources */,
+				6657188B1809C51500118EF3 /* Frameworks */,
+				6657188C1809C51500118EF3 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GraphDecomposition;
+			productName = GraphDecomposition;
+			productReference = 6657188E1809C51500118EF3 /* GraphDecomposition */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		665718861809C51500118EF3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0500;
+				ORGANIZATIONNAME = CVUT;
+			};
+			buildConfigurationList = 665718891809C51500118EF3 /* Build configuration list for PBXProject "GraphDecomposition" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 665718851809C51500118EF3;
+			productRefGroup = 6657188F1809C51500118EF3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6657188D1809C51500118EF3 /* GraphDecomposition */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6657188A1809C51500118EF3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				665718AD1809C57700118EF3 /* GDExplorationStack.c in Sources */,
+				665718B01809C57700118EF3 /* GDMatrix.c in Sources */,
+				665718AE1809C57700118EF3 /* GDExplorer.c in Sources */,
+				665718AB1809C57700118EF3 /* GDAlgorithmTests.c in Sources */,
+				665718AC1809C57700118EF3 /* GDDefines.c in Sources */,
+				665718B31809C57700118EF3 /* main.c in Sources */,
+				665718AF1809C57700118EF3 /* GDGraph.c in Sources */,
+				665718B21809C57700118EF3 /* GDTriangleList.c in Sources */,
+				665718B11809C57700118EF3 /* GDSolution.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		665718951809C51500118EF3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		665718961809C51500118EF3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		665718981809C51500118EF3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		665718991809C51500118EF3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		665718891809C51500118EF3 /* Build configuration list for PBXProject "GraphDecomposition" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				665718951809C51500118EF3 /* Debug */,
+				665718961809C51500118EF3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		665718971809C51500118EF3 /* Build configuration list for PBXNativeTarget "GraphDecomposition" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				665718981809C51500118EF3 /* Debug */,
+				665718991809C51500118EF3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 665718861809C51500118EF3 /* Project object */;
+}

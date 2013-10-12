@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>AF6C2C57-12ED-40FB-BEB5-9E3DD30E4A38</string>
+	<key>IDESourceControlProjectName</key>
+	<string>GraphDecomposition</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>3B21AAB7-BCB7-422C-B885-1B9B3A4F1138</key>
+		<string>https://github.com/pteasima/MI-PPR-TRD.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>src/GraphDecomposition.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>3B21AAB7-BCB7-422C-B885-1B9B3A4F1138</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/pteasima/MI-PPR-TRD.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>3B21AAB7-BCB7-422C-B885-1B9B3A4F1138</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>3B21AAB7-BCB7-422C-B885-1B9B3A4F1138</string>
+			<key>IDESourceControlWCCName</key>
+			<string>MI-PPR-TRD</string>
+		</dict>
+	</array>
+</dict>
+</plist>
