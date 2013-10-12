@@ -36,12 +36,11 @@ void runLoop(GDExplorerRef explorer) {
   printf("Finding best solution...\n");
   
   while ( YES ) {
+
+    GDBool canExistBetterSolution;
+    GDExplorerRun(explorer, -1, &canExistBetterSolution);
     
-    GDExplorerRun(explorer, 100000);
-    
-    GDTriangleListPrint(explorer->triangleList);
-    
-    if (explorer->explorationStack->count == 0 ) {
+    if (explorer->explorationStack->count == 0 || canExistBetterSolution == NO ) {
       break;
     }
     

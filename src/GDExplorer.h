@@ -52,7 +52,7 @@ void GDExplorerRelease(GDExplorerRef explorer);
 /**
  * @param stepsLimit If -1 then runs until have items in exploration stack
  */
-void GDExplorerRun(GDExplorerRef explorer, int stepsLimit);
+void GDExplorerRun(GDExplorerRef explorer, int stepsLimit, GDBool * canExistBetter);
 
 GDExplorationStackRef GDExplorerGetExplorationStack(GDExplorerRef explorer);
 

@@ -18,7 +18,7 @@ int runWithGraph(GDGraphRef graph) {
   GDExplorerSetExplorationStack(explorer, stack);
   
   while ( YES ) {
-    GDExplorerRun(explorer, -1);
+    GDExplorerRun(explorer, -1, NULL);
     if (explorer->explorationStack->count == 0 ) {
       break;
     }

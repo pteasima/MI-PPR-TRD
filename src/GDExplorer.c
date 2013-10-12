@@ -84,7 +84,7 @@ void GDExplorerRelease(GDExplorerRef explorer) {
 
 #pragma mark - Main
 
-void GDExplorerRun(GDExplorerRef explorer, int stepsLimit) {
+void GDExplorerRun(GDExplorerRef explorer, int stepsLimit, GDBool * canExistBetter) {
   
   int stepCounter = 0;
   while ( explorer->explorationStack->count > 0 ) {
@@ -93,7 +93,10 @@ void GDExplorerRun(GDExplorerRef explorer, int stepsLimit) {
     processState(explorer, state);
 
     if ( !GDSolutionCanExistsBetter(explorer->bestSolution) ) {
-      break;
+      if ( canExistBetter ) {
+        *canExistBetter = NO;
+      }
+      return;
     }
     
     stepCounter++;
@@ -101,6 +104,10 @@ void GDExplorerRun(GDExplorerRef explorer, int stepsLimit) {
       break;
     }
     
+  }
+  
+  if ( canExistBetter ) {
+    *canExistBetter = YES;
   }
   
 }
