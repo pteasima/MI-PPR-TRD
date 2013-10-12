@@ -89,9 +89,19 @@ void finallize(GDExplorerRef explorer) {
 
 int main(int argc, const char * argv[]) {
   
-  GDAlgorithmTestsRun();
+  if ( argc != 2 ) {
+    printf("Invalid number of arguments\n");
+    return 0;
+  }
   
-  GDGraphRef graph = GDGraphCreateFromFile("/Users/adam/Documents/School/CTU FIT - MI/PRR/Git/MI-PPR-TRD/data/test.txt");
+  const char * path = argv[1];
+  
+  GDGraphRef graph = GDGraphCreateFromFile(path);
+  
+  if ( graph == NULL ) {
+    printf("Unable to load graph (%s)\n", path);
+    return 0;
+  }
   
   GDExplorerRef explorer = GDExplorerCreate(graph);
   
