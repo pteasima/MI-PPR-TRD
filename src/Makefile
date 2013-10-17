@@ -1,6 +1,6 @@
 CC 		= gcc
 TARGET 		= trd
-FLAGS_BASE	= -Wall -O2
+FLAGS_BASE	= -Wall -O2 -std=c99
 FLAGS 		= $(FLAGS_BASE)
 OBJFILES 	:= $(patsubst %.c,%.o,$(wildcard *.c))
 

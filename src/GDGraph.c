@@ -35,7 +35,7 @@ GDGraphRef GDGraphCreateRandom(unsigned int nodesCount) {
   
   for ( unsigned int rowIdx = 0; rowIdx < graph->nodesCount; rowIdx++ ) {
     for ( unsigned int colIdx = 0; colIdx < graph->nodesCount; colIdx++) {
-      GDBool value = colIdx != rowIdx ? arc4random() % 2 : NO;
+      GDBool value = colIdx != rowIdx ? random() % 2 : NO;
       graph->adjacencyMatrix->rows[rowIdx][colIdx] = value;
       graph->adjacencyMatrix->rows[colIdx][rowIdx] = value;
     }
