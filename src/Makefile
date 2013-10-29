@@ -1,4 +1,4 @@
-CC 		= gcc
+CC 		= mpicc
 TARGET 		= trd
 FLAGS_BASE	= -Wall -O2 -std=c99
 FLAGS 		= $(FLAGS_BASE)

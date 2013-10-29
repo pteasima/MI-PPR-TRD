@@ -16,6 +16,8 @@
 		665718B11809C57700118EF3 /* GDSolution.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718A81809C57700118EF3 /* GDSolution.c */; };
 		665718B21809C57700118EF3 /* GDTriangleList.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718A91809C57700118EF3 /* GDTriangleList.c */; };
 		665718B31809C57700118EF3 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718AA1809C57700118EF3 /* main.c */; };
+		6D1AB8E5181F47D9009AC74D /* libmpi.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D1AB8E4181F47D9009AC74D /* libmpi.1.dylib */; };
+		6D1AB8E7181F47E7009AC74D /* libmpi_cxx.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D1AB8E6181F47E7009AC74D /* libmpi_cxx.1.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -49,6 +51,8 @@
 		665718A81809C57700118EF3 /* GDSolution.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDSolution.c; sourceTree = SOURCE_ROOT; };
 		665718A91809C57700118EF3 /* GDTriangleList.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDTriangleList.c; sourceTree = SOURCE_ROOT; };
 		665718AA1809C57700118EF3 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = SOURCE_ROOT; };
+		6D1AB8E4181F47D9009AC74D /* libmpi.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi.1.dylib; path = ../../../../../../opt/local/lib/libmpi.1.dylib; sourceTree = "<group>"; };
+		6D1AB8E6181F47E7009AC74D /* libmpi_cxx.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi_cxx.1.dylib; path = ../../../../../../opt/local/lib/libmpi_cxx.1.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +60,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6D1AB8E7181F47E7009AC74D /* libmpi_cxx.1.dylib in Frameworks */,
+				6D1AB8E5181F47D9009AC74D /* libmpi.1.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +71,8 @@
 		665718851809C51500118EF3 = {
 			isa = PBXGroup;
 			children = (
+				6D1AB8E6181F47E7009AC74D /* libmpi_cxx.1.dylib */,
+				6D1AB8E4181F47D9009AC74D /* libmpi.1.dylib */,
 				665718901809C51500118EF3 /* GraphDecomposition */,
 				6657188F1809C51500118EF3 /* Products */,
 			);
@@ -202,6 +210,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
 		};
@@ -233,20 +242,31 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
 		};
 		665718981809C51500118EF3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					/opt/local/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "/opt/local/include/**";
 			};
 			name = Debug;
 		};
 		665718991809C51500118EF3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					/opt/local/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "/opt/local/include/**";
 			};
 			name = Release;
 		};
