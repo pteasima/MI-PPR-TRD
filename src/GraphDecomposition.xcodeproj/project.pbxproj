@@ -16,6 +16,10 @@
 		665718B11809C57700118EF3 /* GDSolution.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718A81809C57700118EF3 /* GDSolution.c */; };
 		665718B21809C57700118EF3 /* GDTriangleList.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718A91809C57700118EF3 /* GDTriangleList.c */; };
 		665718B31809C57700118EF3 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 665718AA1809C57700118EF3 /* main.c */; };
+		66D43EB91826FFCD00650A7D /* GDDataReader.c in Sources */ = {isa = PBXBuildFile; fileRef = 66D43EB51826FFCD00650A7D /* GDDataReader.c */; };
+		66D43EBA1826FFCD00650A7D /* GDDataWriter.c in Sources */ = {isa = PBXBuildFile; fileRef = 66D43EB61826FFCD00650A7D /* GDDataWriter.c */; };
+		66D43EBB1826FFCD00650A7D /* GDExplorationStackTests.c in Sources */ = {isa = PBXBuildFile; fileRef = 66D43EB71826FFCD00650A7D /* GDExplorationStackTests.c */; };
+		66D43EBC1826FFCD00650A7D /* GDGraphSerializationTests.c in Sources */ = {isa = PBXBuildFile; fileRef = 66D43EB81826FFCD00650A7D /* GDGraphSerializationTests.c */; };
 		6D1AB8E5181F47D9009AC74D /* libmpi.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D1AB8E4181F47D9009AC74D /* libmpi.1.dylib */; };
 		6D1AB8E7181F47E7009AC74D /* libmpi_cxx.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D1AB8E6181F47E7009AC74D /* libmpi_cxx.1.dylib */; };
 /* End PBXBuildFile section */
@@ -51,6 +55,14 @@
 		665718A81809C57700118EF3 /* GDSolution.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDSolution.c; sourceTree = SOURCE_ROOT; };
 		665718A91809C57700118EF3 /* GDTriangleList.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDTriangleList.c; sourceTree = SOURCE_ROOT; };
 		665718AA1809C57700118EF3 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = SOURCE_ROOT; };
+		66D43EB11826FFCD00650A7D /* GDDataReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDDataReader.h; sourceTree = SOURCE_ROOT; };
+		66D43EB21826FFCD00650A7D /* GDDataWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDDataWriter.h; sourceTree = SOURCE_ROOT; };
+		66D43EB31826FFCD00650A7D /* GDExplorationStackTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDExplorationStackTests.h; sourceTree = SOURCE_ROOT; };
+		66D43EB41826FFCD00650A7D /* GDGraphSerializationTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDGraphSerializationTests.h; sourceTree = SOURCE_ROOT; };
+		66D43EB51826FFCD00650A7D /* GDDataReader.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDDataReader.c; sourceTree = SOURCE_ROOT; };
+		66D43EB61826FFCD00650A7D /* GDDataWriter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDDataWriter.c; sourceTree = SOURCE_ROOT; };
+		66D43EB71826FFCD00650A7D /* GDExplorationStackTests.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDExplorationStackTests.c; sourceTree = SOURCE_ROOT; };
+		66D43EB81826FFCD00650A7D /* GDGraphSerializationTests.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GDGraphSerializationTests.c; sourceTree = SOURCE_ROOT; };
 		6D1AB8E4181F47D9009AC74D /* libmpi.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi.1.dylib; path = ../../../../../../opt/local/lib/libmpi.1.dylib; sourceTree = "<group>"; };
 		6D1AB8E6181F47E7009AC74D /* libmpi_cxx.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi_cxx.1.dylib; path = ../../../../../../opt/local/lib/libmpi_cxx.1.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -89,10 +101,22 @@
 		665718901809C51500118EF3 /* GraphDecomposition */ = {
 			isa = PBXGroup;
 			children = (
+				665718AA1809C57700118EF3 /* main.c */,
+				66D43EAF1826FF8A00650A7D /* Algorithm */,
+			);
+			path = GraphDecomposition;
+			sourceTree = "<group>";
+		};
+		66D43EAF1826FF8A00650A7D /* Algorithm */ = {
+			isa = PBXGroup;
+			children = (
+				66D43EB01826FF9700650A7D /* Tests */,
 				6657189B1809C57700118EF3 /* GDDefines.h */,
 				665718A31809C57700118EF3 /* GDDefines.c */,
-				6657189A1809C57700118EF3 /* GDAlgorithmTests.h */,
-				665718A21809C57700118EF3 /* GDAlgorithmTests.c */,
+				66D43EB11826FFCD00650A7D /* GDDataReader.h */,
+				66D43EB51826FFCD00650A7D /* GDDataReader.c */,
+				66D43EB21826FFCD00650A7D /* GDDataWriter.h */,
+				66D43EB61826FFCD00650A7D /* GDDataWriter.c */,
 				6657189C1809C57700118EF3 /* GDExplorationStack.h */,
 				665718A41809C57700118EF3 /* GDExplorationStack.c */,
 				6657189D1809C57700118EF3 /* GDExplorer.h */,
@@ -105,9 +129,21 @@
 				665718A81809C57700118EF3 /* GDSolution.c */,
 				665718A11809C57700118EF3 /* GDTriangleList.h */,
 				665718A91809C57700118EF3 /* GDTriangleList.c */,
-				665718AA1809C57700118EF3 /* main.c */,
 			);
-			path = GraphDecomposition;
+			name = Algorithm;
+			sourceTree = "<group>";
+		};
+		66D43EB01826FF9700650A7D /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				66D43EB71826FFCD00650A7D /* GDExplorationStackTests.c */,
+				66D43EB31826FFCD00650A7D /* GDExplorationStackTests.h */,
+				66D43EB41826FFCD00650A7D /* GDGraphSerializationTests.h */,
+				66D43EB81826FFCD00650A7D /* GDGraphSerializationTests.c */,
+				6657189A1809C57700118EF3 /* GDAlgorithmTests.h */,
+				665718A21809C57700118EF3 /* GDAlgorithmTests.c */,
+			);
+			name = Tests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -167,9 +203,13 @@
 				665718AB1809C57700118EF3 /* GDAlgorithmTests.c in Sources */,
 				665718AC1809C57700118EF3 /* GDDefines.c in Sources */,
 				665718B31809C57700118EF3 /* main.c in Sources */,
+				66D43EBA1826FFCD00650A7D /* GDDataWriter.c in Sources */,
+				66D43EBC1826FFCD00650A7D /* GDGraphSerializationTests.c in Sources */,
 				665718AF1809C57700118EF3 /* GDGraph.c in Sources */,
 				665718B21809C57700118EF3 /* GDTriangleList.c in Sources */,
 				665718B11809C57700118EF3 /* GDSolution.c in Sources */,
+				66D43EB91826FFCD00650A7D /* GDDataReader.c in Sources */,
+				66D43EBB1826FFCD00650A7D /* GDExplorationStackTests.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
