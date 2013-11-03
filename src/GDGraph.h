@@ -26,7 +26,7 @@ GDGraphRef GDGraphCreateEmpty(unsigned int nodesCount);
 
 GDGraphRef GDGraphCreateFromFile(const char * path);
 
-GDGraphRef GDGraphCreateFromData(const void * data, unsigned long int length);
+GDGraphRef GDGraphCreateFromData(char * bytes, unsigned long int length);
 
 GDGraphRef GDGraphCreateRandom(unsigned int nodesCount);
 
@@ -38,7 +38,8 @@ GDBool GDGraphHasConnection(GDGraphRef graph, GDNodeID node1, GDNodeID node2);
 
 void GDGraphPrint(GDGraphRef graph);
 
-void GDGraphGetData(GDGraphRef graph, const void ** data, unsigned long int * length);
+void GDGraphGetData(GDGraphRef graph, char ** bytes, unsigned long int * length);
 
+GDBool GDGraphEqual(GDGraphRef graph1, GDGraphRef graph2);
 
 #endif

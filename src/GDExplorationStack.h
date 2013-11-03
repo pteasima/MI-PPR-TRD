@@ -20,7 +20,6 @@ typedef struct GDExplorationStackItem {
 
 GDExplorationStackItem GDExplorationStackCreateItem(unsigned int level, GDNodeID node);
 
-
 typedef struct GDExplorationStack {
   
   GDExplorationStackItem * values;
@@ -34,7 +33,7 @@ typedef GDExplorationStack * GDExplorationStackRef;
 
 GDExplorationStackRef GDExplorationStackCreateWithCapacity(unsigned int initialCapcity);
 
-GDExplorationStackRef GDExplorationStackhCreateFromData(void * data, unsigned long int length);
+GDExplorationStackRef GDExplorationStackhCreateFromData(char * bytes, unsigned long int length);
   
 void GDExplorationStackRelease(GDExplorationStackRef stack);
 
@@ -46,10 +45,12 @@ GDExplorationStackItem GDExplorationStackTop(GDExplorationStackRef stack);
 
 void GDExplorationStackAddAllNodes(GDExplorationStackRef stack, GDGraphRef graph);
 
+GDBool GDExplorationStackEqual(GDExplorationStackRef stack1, GDExplorationStackRef stack2);
+
 /**
  * Use this to serialize exploration stack
  */
-void GDExplorationStackGetData(GDExplorationStackRef stack, void ** data, unsigned long int * length);
+void GDExplorationStackGetData(GDExplorationStackRef stack, char ** bytes, unsigned long int * length);
 
 
 /**

@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include "GDDataWriter.h"
+#include "GDDataReader.h"
 
 #pragma mark - Item
 
@@ -96,19 +98,48 @@ GDExplorationStackItem GDExplorationStackTop(GDExplorationStackRef stack) {
 
 #pragma mark - Serialization
 
-GDExplorationStackRef GDExplorationStackhCreateFromData(void * data, unsigned long int length) {
+GDExplorationStackRef GDExplorationStackhCreateFromData(char * bytes, unsigned long int length) {
   
-  assert("Not implemented");
-  // TODO
+  GDExplorationStackRef stack = malloc(sizeof(GDExplorationStack));
   
-  return NULL;
+  GDDataReaderRef reader = GDDataReaderCreateWithCapacity(bytes, length);
+  stack->count = GDDataReaderReadUnsignedInt(reader);
+  stack->capacity = GDDataReaderReadUnsignedInt(reader);
+  
+  GDExplorationStackItem * values = malloc(sizeof(GDExplorationStackItem) * stack->capacity);
+  stack->values = values;
+
+  for ( unsigned int itemIdx = 0; itemIdx < stack->count; itemIdx++ ) {
+    stack->values[itemIdx].level = GDDataReaderReadUnsignedInt(reader);
+    stack->values[itemIdx].node = GDDataReaderReadUnsignedInt(reader);
+  }
+  
+  GDDataReaderRelease(reader);
+  
+  return stack;
   
 }
 
-void GDExplorationStackGetData(GDExplorationStackRef stack, void ** data, unsigned long int * length) {
+void GDExplorationStackGetData(GDExplorationStackRef stack, char ** bytes, unsigned long int * length) {
   
-  assert("Not implemented");
-  // TODOstack
+  assert(bytes != NULL);
+  assert(length != NULL);
+  
+  size_t size = sizeof(unsigned int) * (1 + 2 * stack->count);
+  
+  GDDataWriterRef writer = GDDataWriterCreateWithCapacity(size);
+  
+  GDDataWriterWriteUnsignedInt(writer, stack->count);
+  
+  for ( unsigned int itemIdx = 0; itemIdx < stack->count; itemIdx++ ) {
+    GDDataWriterWriteUnsignedInt(writer, stack->values[itemIdx].level);
+    GDDataWriterWriteUnsignedInt(writer, stack->values[itemIdx].node);
+  }
+  
+  *bytes = writer->bytes;
+  *length = writer->lenght;
+  
+  GDDataWriterRelease(writer);
   
 }
 
@@ -126,7 +157,6 @@ void GDExplorationStackAddAllNodes(GDExplorationStackRef stack, GDGraphRef graph
 
 GDExplorationStackRef GDExplorationStackSplit(GDExplorationStackRef stack) {
   
-  assert("Not implemented");
   // TODO
   
   return NULL;
@@ -134,4 +164,26 @@ GDExplorationStackRef GDExplorationStackSplit(GDExplorationStackRef stack) {
 }
 
 
+#pragma mark - Helpers
+
+GDBool GDExplorationStackEqual(GDExplorationStackRef stack1, GDExplorationStackRef stack2) {
+  
+  assert(stack1 != NULL);
+  assert(stack2 != NULL);
+  
+  if ( stack1->count != stack2->count ) {
+    return NO;
+  }
+  
+  for ( unsigned int itemIdx = 0; itemIdx < stack1->count; itemIdx++ ) {
+    GDExplorationStackItem item1 = stack1->values[itemIdx];
+    GDExplorationStackItem item2 = stack1->values[itemIdx];
+    if ( item1.level != item2.level || item1.node != item2.node ) {
+      return NO;
+    }
+  }
+  
+  return YES;
+  
+}
 

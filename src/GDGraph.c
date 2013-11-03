@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "GDDataWriter.h"
+#include "GDDataReader.h"
 
 #pragma mark - Lifecycle
 
@@ -45,7 +47,6 @@ GDGraphRef GDGraphCreateRandom(unsigned int nodesCount) {
   
 }
 
-
 GDGraphRef GDGraphCreateFromFile(const char * path) {
   
   assert(path != NULL);
@@ -69,6 +70,7 @@ GDGraphRef GDGraphCreateFromFile(const char * path) {
   fscanf(fileHandler, "%c", &newLineChar);
   
   GDGraphRef graph = GDGraphCreateEmpty(nodesCount);
+  graph->edgesCount = 0;
   
   for ( int rowIdx = 0; rowIdx < nodesCount; rowIdx++ ) {
     for ( int colIdx = 0; colIdx < nodesCount + 1; colIdx++ ) {
@@ -87,6 +89,7 @@ GDGraphRef GDGraphCreateFromFile(const char * path) {
       }
       if ( rowIdx != colIdx && readChar == '1' ){
         GDGraphAddConnection(graph, rowIdx, colIdx);
+        graph->edgesCount++;
       }
       
     }
@@ -132,6 +135,64 @@ GDBool GDGraphHasConnection(GDGraphRef graph, GDNodeID node1, GDNodeID node2) {
   
 }
 
+
+#pragma mark - Serialization
+
+GDGraphRef GDGraphCreateFromData(char * bytes, unsigned long int length) {
+
+  GDGraphRef graph = malloc(sizeof(GDGraph));
+
+  GDDataReaderRef reader = GDDataReaderCreateWithCapacity(bytes, length);
+  
+  graph->nodesCount = GDDataReaderReadUnsignedInt(reader);
+  graph->edgesCount = 0;
+  graph->adjacencyMatrix = GDMatrixCreate(graph->nodesCount, graph->nodesCount);
+  
+  unsigned edgesCount = GDDataReaderReadUnsignedInt(reader);
+  for ( unsigned int edgeIdx = 0; edgeIdx < edgesCount; edgeIdx++ ) {
+    unsigned node1 = GDDataReaderReadUnsignedInt(reader);
+    unsigned node2 = GDDataReaderReadUnsignedInt(reader);
+    GDGraphAddConnection(graph, node1, node2);
+  }
+  
+  GDDataReaderRelease(reader);
+  
+  return graph;
+  
+}
+
+void GDGraphGetData(GDGraphRef graph, char ** bytes, unsigned long int * length) {
+
+  assert(bytes != NULL);
+  assert(length != NULL);
+  
+  size_t size = sizeof(unsigned int) * (2 + 2 * graph->edgesCount);
+  
+  GDDataWriterRef writer = GDDataWriterCreateWithCapacity(size);
+  
+  GDDataWriterWriteUnsignedInt(writer, graph->nodesCount);
+  GDDataWriterWriteUnsignedInt(writer, graph->edgesCount);
+  if ( graph->nodesCount > 0 ) {
+    for ( unsigned int rowIdx = 0; rowIdx < graph->nodesCount - 1; rowIdx++ ) {
+      for ( unsigned int colIdx = rowIdx + 1; colIdx < graph->nodesCount; colIdx++) {
+        if ( GDGraphHasConnection(graph, rowIdx, colIdx) ) {
+          GDDataWriterWriteUnsignedInt(writer, rowIdx);
+          GDDataWriterWriteUnsignedInt(writer, colIdx);
+        }
+      }
+    }
+  }
+  
+  *bytes = writer->bytes;
+  *length = writer->lenght;
+  
+  GDDataWriterRelease(writer);
+  
+}
+
+
+#pragma mark - Helpers
+
 void GDGraphPrint(GDGraphRef graph) {
   
   assert(graph != NULL);
@@ -167,23 +228,26 @@ void GDGraphPrint(GDGraphRef graph) {
   
 }
 
-
-
-#pragma mark - Serialization
-
-GDGraphRef GDGraphCreateFromData(const void * data, unsigned long int length) {
+GDBool GDGraphEqual(GDGraphRef graph1, GDGraphRef graph2) {
   
-  assert("Not implemented");
-  // TODO
+  assert(graph1 != NULL);
+  assert(graph1->adjacencyMatrix != NULL);
+  assert(graph2 != NULL);
+  assert(graph2->adjacencyMatrix != NULL);
   
-  return NULL;
+  if ( graph1->nodesCount != graph2->nodesCount ) {
+    return NO;
+  }
   
-}
-
-void GDGraphGetData(GDGraphRef graph, const void ** data, unsigned long int * length) {
+  for ( unsigned int rowIdx = 0; rowIdx < graph1->nodesCount; rowIdx++ ) {
+    for ( unsigned int colIdx = 0; colIdx < graph1->nodesCount; colIdx++) {
+      if ( graph1->adjacencyMatrix->rows[rowIdx][colIdx] != graph2->adjacencyMatrix->rows[rowIdx][colIdx] ) {
+        return NO;
+      }
+    }
+  }
   
-  assert("Not implemented");
-  // TODO
+  return YES;
   
 }
 

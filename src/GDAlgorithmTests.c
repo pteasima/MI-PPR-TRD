@@ -168,52 +168,54 @@ GDBool test8() {
 
 void GDAlgorithmTestsRun() {
   
+  printf("\nALGORITHM TESTS:\n");
+  
   if ( test1() == YES ) {
-    printf("Test 1 OK\n");
+    printf("Test 1.....OK\n");
   } else {
-    printf("Test 1 failed\n");
+    printf("Test 1.....failed\n");
   }
   
   if ( test2() == YES ) {
-    printf("Test 2 OK\n");
+    printf("Test 2.....OK\n");
   } else {
-    printf("Test 2 failed\n");
+    printf("Test 2.....failed\n");
   }
   
   if ( test3() == YES ) {
-    printf("Test 3 OK\n");
+    printf("Test 3.....OK\n");
   } else {
-    printf("Test 3 failed\n");
+    printf("Test 3.....failed\n");
   }
   
   if ( test4() == YES ) {
-    printf("Test 4 OK\n");
+    printf("Test 4.....OK\n");
   } else {
-    printf("Test 4 failed\n");
+    printf("Test 4.....failed\n");
   }
   
   if ( test5() == YES ) {
-    printf("Test 5 OK\n");
+    printf("Test 5.....OK\n");
   } else {
-    printf("Test 5 failed\n");
+    printf("Test 5.....failed\n");
   }
   
   if ( test6() == YES ) {
-    printf("Test 6 OK\n");
+    printf("Test 6.....OK\n");
   } else {
-    printf("Test 6 failed\n");
+    printf("Test 6.....failed\n");
   }
   
   if ( test7() == YES ) {
-    printf("Test 7 OK\n");
+    printf("Test 7.....OK\n");
   } else {
-    printf("Test 7 failed\n");
+    printf("Test 7.....failed\n");
   }
   
   if ( test8() == YES ) {
-    printf("Test 8 OK\n");
+    printf("Test 8.....OK\n");
   } else {
-    printf("Test 8 failed\n");
+    printf("Test 8.....failed\n");
   }
   
 }
