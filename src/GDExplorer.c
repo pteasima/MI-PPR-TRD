@@ -14,8 +14,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-
-
+#include "GDDataWriter.h"
+#include "GDDataReader.h"
 
 #pragma mark - Private Interfaces
 
@@ -32,24 +32,6 @@ GDBool expandToNeighboursOfNode(GDExplorerRef explorer, GDNodeID node, unsigned 
 GDBool isNodeExpandableToNeighbours(GDExplorerRef explorer, GDNodeID node);
 
 GDBool canExistsBetterSolution(GDExplorerRef explorer);
-
-
-
-#pragma mark - Accessors
-
-GDExplorationStackRef GDExplorerGetExplorationStack(GDExplorerRef explorer) {
-  
-  return explorer->explorationStack;
-  
-}
-
-void GDExplorerSetExplorationStack(GDExplorerRef explorer, GDExplorationStackRef explorationStack) {
-  
-  GDExplorationStackRelease(explorer->explorationStack);
-  explorer->explorationStack = explorationStack;
-  
-}
-
 
 
 #pragma mark - Lifecycle
@@ -82,7 +64,7 @@ void GDExplorerRelease(GDExplorerRef explorer) {
 }
 
 
-#pragma mark - Main
+#pragma mark - Exploration
 
 void GDExplorerRun(GDExplorerRef explorer, int stepsLimit, GDBool * canExistBetter) {
   
@@ -112,9 +94,6 @@ void GDExplorerRun(GDExplorerRef explorer, int stepsLimit, GDBool * canExistBett
   
 }
 
-
-#pragma mark - Processing
-
 void processState(GDExplorerRef explorer, GDExplorationStackItem state) {
   
   GDTriangleListPush(explorer->triangleList, state.node);
@@ -139,10 +118,7 @@ void processState(GDExplorerRef explorer, GDExplorationStackItem state) {
     GDTriangleListPop(explorer->triangleList);
     if ( explorer->explorationStack->count > 0 ) {
       GDExplorationStackItem nextTopContext = GDExplorationStackTop(explorer->explorationStack);
-      int levelsDelta = state.level - nextTopContext.level;
-      for ( int level = 0; level < levelsDelta; level++ ) {
-        GDTriangleListPop(explorer->triangleList);
-      }
+      GDTriangleListPopMultiple(explorer->triangleList, state.level - nextTopContext.level);
     }
     
   }
@@ -258,5 +234,102 @@ GDBool canExistsBetterSolution(GDExplorerRef explorer) {
   return retVal;
   
 }
+
+
+#pragma mark - Work Distribution
+
+void GDExplorerInitializeWork(GDExplorerRef explorer) {
+  
+  GDExplorationStackRef stack = GDExplorationStackCreateWithCapacity(64);
+  for ( GDNodeID node = 0; node < explorer->graph->nodesCount; node++ ) {
+    GDExplorationStackItem state = GDExplorationStackCreateItem(0, node);
+    GDExplorationStackPush(stack, state);
+  }
+  
+  GDExplorationStackRelease(explorer->explorationStack);
+  explorer->explorationStack = stack;
+  
+}
+
+GDBool GDExplorerGetWork(GDExplorerRef explorer, char ** bytes, unsigned long int * lenght) {
+
+  if ( explorer->explorationStack->count == 0 ) {
+    return NO;
+  }
+  
+  GDExplorationStackRef stack = explorer->explorationStack;
+  GDExplorationStackRef stackSplited = GDExplorationStackSplit(stack);
+
+  if ( stackSplited->count == 0 ) {
+    GDExplorationStackRelease(stackSplited);
+    return NO;
+  }
+  
+  GDTriangleListRef triangleListSplited = GDTriangleListCopy(explorer->triangleList);
+  GDTriangleListPopMultiple(triangleListSplited, triangleListSplited->count - GDExplorationStackTop(stackSplited).level);
+  GDTriangleListPopMultiple(explorer->triangleList, explorer->triangleList->count - GDExplorationStackTop(stack).level);
+  
+  char * triangleListBytes;
+  unsigned long int triangleListLenght;
+  GDTriangleListGetData(triangleListSplited, &triangleListBytes, &triangleListLenght);
+  
+  char * stackBytes;
+  unsigned long int stackLenght;
+  GDExplorationStackGetData(stackSplited, &stackBytes, &stackLenght);
+  
+  GDDataWriterRef writer = GDDataWriterCreateWithCapacity(sizeof(unsigned long int) + triangleListLenght + sizeof(unsigned long int) + stackLenght);
+
+  GDDataWriterWriteUnsignedLongInt(writer, triangleListLenght);
+  GDDataWriterWriteBytes(writer, triangleListBytes, triangleListLenght);
+  
+  GDDataWriterWriteUnsignedLongInt(writer, stackLenght);
+  GDDataWriterWriteBytes(writer, stackBytes, stackLenght);
+  
+  free(triangleListBytes);
+  free(stackBytes);
+  
+  if ( bytes ) {
+    *bytes = writer->bytes;
+  } else {
+    free(bytes);
+  }
+  
+  if ( lenght ) {
+    *lenght = writer->lenght;
+  }
+  
+  GDTriangleListRelease(triangleListSplited);
+  GDExplorationStackRelease(stackSplited);
+  GDDataWriterRelease(writer);
+  
+  return YES;
+  
+}
+
+void GDExplorerSetWork(GDExplorerRef explorer, char * bytes, unsigned long int lenght) {
+  
+  GDDataReaderRef reader = GDDataReaderCreateWithCapacity(bytes, lenght);
+  
+  unsigned long int triangleListLenght = GDDataReaderReadUnsignedLongInt(reader);
+  char * triangleListBytes;
+  GDDataReaderReadBytes(reader, triangleListLenght, &triangleListBytes);
+  GDTriangleListRef triangleList = GDTriangleListCreateFromData(triangleListBytes, triangleListLenght);
+  free(triangleListBytes);
+  
+  unsigned long int stackLenght = GDDataReaderReadUnsignedLongInt(reader);
+  char * stackBytes;
+  GDDataReaderReadBytes(reader, stackLenght, &stackBytes);
+  GDExplorationStackRef stack = GDExplorationStackCreateFromData(stackBytes, stackLenght);
+  free(stackBytes);
+  
+  GDTriangleListRelease(explorer->triangleList);
+  GDExplorationStackRelease(explorer->explorationStack);
+  explorer->triangleList = triangleList;
+  explorer->explorationStack = stack;
+  
+}
+
+
+
 
 

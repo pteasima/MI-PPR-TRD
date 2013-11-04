@@ -50,8 +50,8 @@ GDTriangleListRef GDTriangleListCopy(GDTriangleListRef triangleList) {
   copy->values = valuesCopy;
   copy->capacity = triangleList->capacity;
   copy->count = triangleList->count;
-  copy->edgesUsage = NULL;
-  copy->lastTriangleEdgesUsage = NULL;
+  copy->edgesUsage = GDMatrixCopy(triangleList->edgesUsage);
+  copy->lastTriangleEdgesUsage = GDMatrixCopy(triangleList->lastTriangleEdgesUsage);
   
   return copy;
   
@@ -106,6 +106,14 @@ void GDTriangleListPush(GDTriangleListRef triangleList, GDNodeID value) {
   
   triangleList->values[triangleList->count] = value;
   triangleList->count = triangleList->count + 1;
+  
+}
+
+void GDTriangleListPopMultiple(GDTriangleListRef triangleList, int count) {
+  
+  for ( int level = 0; level < count; level++ ) {
+    GDTriangleListPop(triangleList);
+  }
   
 }
 

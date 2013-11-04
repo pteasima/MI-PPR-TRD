@@ -21,6 +21,8 @@ typedef GDMatrix * GDMatrixRef;
 
 GDMatrixRef GDMatrixCreate(unsigned int rowsCount, unsigned int colsCount);
 
+GDMatrixRef GDMatrixCopy(GDMatrixRef matrix);
+
 void GDMatrixRelease(GDMatrixRef matrix);
 
 void GDMatrixFillWithZeros(GDMatrixRef matrix);

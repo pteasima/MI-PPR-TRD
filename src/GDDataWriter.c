@@ -49,5 +49,31 @@ void GDDataWriterWriteUnsignedInt(GDDataWriterRef dataWriter, unsigned int value
   
 }
 
+void GDDataWriterWriteUnsignedLongInt(GDDataWriterRef dataWriter, unsigned long int value) {
+  
+  size_t bytesCount = sizeof(unsigned long int);
+  assert((dataWriter->position + bytesCount) <= dataWriter->lenght);
+  
+  for ( size_t byteOffset = 0; byteOffset < bytesCount; byteOffset++ ) {
+    dataWriter->bytes[dataWriter->position + byteOffset] = (value >> (8 * byteOffset)) & 0xFF;
+  }
+  
+  dataWriter->position += bytesCount;
+  
+}
+
+void GDDataWriterWriteBytes(GDDataWriterRef dataWriter, char * bytes, unsigned long int lenght) {
+  
+  assert((dataWriter->position + lenght) <= dataWriter->lenght);
+  
+  char * destination = &dataWriter->bytes[dataWriter->position];
+  
+  memcpy(destination, bytes, lenght);
+  
+  dataWriter->position += lenght;
+  
+}
+
+
 
 

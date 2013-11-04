@@ -98,7 +98,7 @@ GDExplorationStackItem GDExplorationStackTop(GDExplorationStackRef stack) {
 
 #pragma mark - Serialization
 
-GDExplorationStackRef GDExplorationStackhCreateFromData(char * bytes, unsigned long int length) {
+GDExplorationStackRef GDExplorationStackCreateFromData(char * bytes, unsigned long int length) {
   
   GDExplorationStackRef stack = malloc(sizeof(GDExplorationStack));
   
@@ -180,7 +180,7 @@ GDExplorationStackRef GDExplorationStackSplit(GDExplorationStackRef stack) {
       currentLevelNodeIdx = 0;
     }
     
-    if ( currentLevelNodeIdx <= currentLevelNodesCount / 2 ) {
+    if ( currentLevelNodeIdx < currentLevelNodesCount / 2 ) {
       GDExplorationStackPush(halfStack1, (GDExplorationStackItem){currentLevel, stack->values[itemIdx].node});
     } else {
       GDExplorationStackPush(halfStack2, (GDExplorationStackItem){currentLevel, stack->values[itemIdx].node});

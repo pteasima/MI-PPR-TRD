@@ -54,8 +54,15 @@ void GDExplorerRelease(GDExplorerRef explorer);
  */
 void GDExplorerRun(GDExplorerRef explorer, int stepsLimit, GDBool * canExistBetter);
 
-GDExplorationStackRef GDExplorerGetExplorationStack(GDExplorerRef explorer);
+void GDExplorerInitializeWork(GDExplorerRef explorer);
 
-void GDExplorerSetExplorationStack(GDExplorerRef explorer, GDExplorationStackRef explorationStack);
+/**
+ * @returns YES if exploration stack was split and bytes and lenght out parameters are valid
+ */
+GDBool GDExplorerGetWork(GDExplorerRef explorer, char ** bytes, unsigned long int * lenght);
+
+void GDExplorerSetWork(GDExplorerRef explorer, char * bytes, unsigned long int lenght);
+
+
 
 #endif

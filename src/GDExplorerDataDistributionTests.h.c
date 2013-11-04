@@ -9,6 +9,7 @@
 #include "GDExplorationStack.h"
 #include "GDGraph.h"
 #include "GDTriangleList.h"
+#include "GDExplorer.h"
 
 #pragma mark - Graph
 
@@ -77,7 +78,7 @@ GDBool testStackSerializationAny() {
   unsigned long lenght;
   char * bytes;
   GDExplorationStackGetData(stack, &bytes, &lenght);
-  GDExplorationStackRef stackCopy = GDExplorationStackhCreateFromData(bytes, lenght);
+  GDExplorationStackRef stackCopy = GDExplorationStackCreateFromData(bytes, lenght);
   free(bytes);
   
   GDBool equals = GDExplorationStackEqual(stackCopy, stack);
@@ -96,7 +97,7 @@ GDBool testStackSerializationEmpty() {
   unsigned long lenght;
   char * bytes;
   GDExplorationStackGetData(stack, &bytes, &lenght);
-  GDExplorationStackRef stackCopy = GDExplorationStackhCreateFromData(bytes, lenght);
+  GDExplorationStackRef stackCopy = GDExplorationStackCreateFromData(bytes, lenght);
   free(bytes);
   
   GDBool equals = GDExplorationStackEqual(stackCopy, stack);
@@ -210,11 +211,46 @@ GDBool testTriangleListSerializationEdges() {
 
 GDBool testWorkMove() {
   
-  return NO;
+  GDBool success = YES;
+  
+  GDGraphRef graph = GDGraphCreateEmpty(4);
+  GDGraphAddConnection(graph, 0, 1);
+  GDGraphAddConnection(graph, 1, 2);
+  GDGraphAddConnection(graph, 2, 0);
+  GDGraphAddConnection(graph, 3, 0);
+  GDGraphAddConnection(graph, 3, 2);
+  
+  GDExplorerRef explorerSource = GDExplorerCreate(graph);
+  GDExplorerInitializeWork(explorerSource);
+  GDExplorerRef explorerDestination = GDExplorerCreate(graph);
+  
+  char * bytes;
+  unsigned long int lenght;
+  GDBool hasWork = GDExplorerGetWork(explorerSource, &bytes, &lenght);
+  if ( hasWork ) {
+    
+    GDExplorerSetWork(explorerDestination, bytes, lenght);
+    free(bytes);
+    
+    success = explorerDestination->explorationStack->count == 2 &&
+    explorerDestination->explorationStack->values[0].level == 0 &&
+    explorerDestination->explorationStack->values[0].node == 2 &&
+    explorerDestination->explorationStack->values[1].level == 0 &&
+    explorerDestination->explorationStack->values[1].node == 3;
+    
+  } else {
+    
+    success = NO;
+    
+  }
+  
+  GDGraphRelease(graph);
+  GDExplorerRelease(explorerSource);
+  GDExplorerRelease(explorerDestination);
+  
+  return success;
   
 }
-
-//TODO
 
 
 #pragma mark - Main

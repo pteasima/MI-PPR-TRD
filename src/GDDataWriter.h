@@ -23,5 +23,9 @@ GDDataWriterRef GDDataWriterCreateWithCapacity(unsigned long int lenght);
 void GDDataWriterRelease(GDDataWriterRef dataWriter);
 
 void GDDataWriterWriteUnsignedInt(GDDataWriterRef dataWriter, unsigned int value);
-  
+
+void GDDataWriterWriteUnsignedLongInt(GDDataWriterRef dataWriter, unsigned long int value);
+
+void GDDataWriterWriteBytes(GDDataWriterRef dataWriter, char * bytes, unsigned long int lenght);
+
 #endif

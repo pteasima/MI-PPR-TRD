@@ -24,4 +24,8 @@ void GDDataReaderRelease(GDDataReaderRef dataBuilder);
 
 unsigned int GDDataReaderReadUnsignedInt(GDDataReaderRef dataReader);
 
+unsigned long int GDDataReaderReadUnsignedLongInt(GDDataReaderRef dataReader);
+
+void GDDataReaderReadBytes(GDDataReaderRef dataReader, unsigned long int lenght, char ** bytes);
+
 #endif

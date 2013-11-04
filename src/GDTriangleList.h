@@ -34,6 +34,8 @@ void GDTriangleListPush(GDTriangleListRef triangleList, GDNodeID value);
 
 GDNodeID GDTriangleListPop(GDTriangleListRef triangleList);
 
+void GDTriangleListPopMultiple(GDTriangleListRef triangleList, int count);
+
 GDNodeID GDTriangleListTop(GDTriangleListRef triangleList);
 
 void GDTriangleListPrint(GDTriangleListRef triangleList);

@@ -29,6 +29,30 @@ GDMatrixRef GDMatrixCreate(unsigned int rowsCount, unsigned int colsCount) {
   
 }
 
+GDMatrixRef GDMatrixCopy(GDMatrixRef matrix) {
+  
+  assert(matrix != NULL);
+  
+  GDMatrixRef copy = malloc(sizeof(GDMatrix));
+  
+  unsigned int ** rows = malloc(sizeof(unsigned int *) * matrix->rowsCount);
+  for ( unsigned int rowIdx = 0; rowIdx < matrix->rowsCount; rowIdx++ ) {
+    rows[rowIdx] = malloc(sizeof(unsigned int) * matrix->colsCount);
+  }
+  copy->rowsCount = matrix->rowsCount;
+  copy->colsCount = matrix->colsCount;
+  copy->rows = rows;
+  for ( unsigned int rowIdx = 0; rowIdx < matrix->rowsCount; rowIdx++ ) {
+    for ( unsigned int colIdx = 0; colIdx < matrix->colsCount; colIdx++) {
+      copy->rows[rowIdx][colIdx] = matrix->rows[rowIdx][colIdx];;
+    }
+  }
+  
+  return copy;
+  
+}
+
+
 void GDMatrixRelease(GDMatrixRef matrix) {
   
   if ( !matrix ) {

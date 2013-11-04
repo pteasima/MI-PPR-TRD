@@ -13,12 +13,7 @@ int runWithGraph(GDGraphRef graph) {
   
   GDExplorerRef explorer = GDExplorerCreate(graph);
   
-  GDExplorationStackRef stack = GDExplorationStackCreateWithCapacity(64);
-  for ( GDNodeID node = 0; node < graph->nodesCount; node++ ) {
-    GDExplorationStackItem state = GDExplorationStackCreateItem(0, node);
-    GDExplorationStackPush(stack, state);
-  }
-  GDExplorerSetExplorationStack(explorer, stack);
+  GDExplorerInitializeWork(explorer);
   
   while ( YES ) {
     GDExplorerRun(explorer, -1, NULL);

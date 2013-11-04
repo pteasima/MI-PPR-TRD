@@ -47,7 +47,7 @@ unsigned int GDExplorationStackNumberOfNodesAtLevel(GDExplorationStackRef stack,
 
 GDExplorationStackRef GDExplorationStackSplit(GDExplorationStackRef stack);
 
-GDExplorationStackRef GDExplorationStackhCreateFromData(char * bytes, unsigned long int length);
+GDExplorationStackRef GDExplorationStackCreateFromData(char * bytes, unsigned long int length);
 
 void GDExplorationStackGetData(GDExplorationStackRef stack, char ** bytes, unsigned long int * length);
 
