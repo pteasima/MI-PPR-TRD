@@ -9,7 +9,10 @@
 #include "GDExplorer.h"
 #include "GDSolution.h"
 #include "GDAlgorithmTests.h"
+#include "GDExplorerDataDistributionTests.h"
+
 #include "mpi.h"
+
 
 #include <string.h>
 #include <unistd.h>
@@ -317,6 +320,11 @@ int main(int argc, char * argv[]) {
 	
 	//finalize MPI
 	MPI_Finalize();
+  
+#warning <#message#>
+  GDExplorerDataDistributionTestsRun();
+  GDAlgorithmTestsRun();
+  
 	return 0;
 	
 }
