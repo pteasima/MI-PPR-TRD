@@ -33,8 +33,6 @@ typedef GDExplorationStack * GDExplorationStackRef;
 
 GDExplorationStackRef GDExplorationStackCreateWithCapacity(unsigned int initialCapcity);
 
-GDExplorationStackRef GDExplorationStackhCreateFromData(char * bytes, unsigned long int length);
-  
 void GDExplorationStackRelease(GDExplorationStackRef stack);
 
 void GDExplorationStackPush(GDExplorationStackRef stack, GDExplorationStackItem item);
@@ -43,21 +41,15 @@ GDExplorationStackItem GDExplorationStackPop(GDExplorationStackRef stack);
 
 GDExplorationStackItem GDExplorationStackTop(GDExplorationStackRef stack);
 
-void GDExplorationStackAddAllNodes(GDExplorationStackRef stack, GDGraphRef graph);
-
 GDBool GDExplorationStackEqual(GDExplorationStackRef stack1, GDExplorationStackRef stack2);
 
-/**
- * Use this to serialize exploration stack
- */
-void GDExplorationStackGetData(GDExplorationStackRef stack, char ** bytes, unsigned long int * length);
+unsigned int GDExplorationStackNumberOfNodesAtLevel(GDExplorationStackRef stack, unsigned int level);
 
-
-/**
- * Splits exploration (remove half of states from stack)
- * @returns Second half of splited stack
- */
 GDExplorationStackRef GDExplorationStackSplit(GDExplorationStackRef stack);
+
+GDExplorationStackRef GDExplorationStackhCreateFromData(char * bytes, unsigned long int length);
+
+void GDExplorationStackGetData(GDExplorationStackRef stack, char ** bytes, unsigned long int * length);
 
 
 #endif

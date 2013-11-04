@@ -1,5 +1,5 @@
 //
-//  GDExplorationStackTests.h
+//  GDExplorerDataDistributionTests.h
 //  GraphDecomposition
 //
 
@@ -7,7 +7,7 @@
 #ifndef GraphDecomposition_GDExplorationStackTests_h
 #define GraphDecomposition_GDExplorationStackTests_h
 
-void GDExplorationStackTestsRun();
+void GDExplorerDataDistributionTestsRun();
 
 #endif
 

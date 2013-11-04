@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include "GDDataWriter.h"
+#include "GDDataReader.h"
+
 
 void setEdgeUsage(GDTriangleListRef triangleList, GDNodeID node1, GDNodeID node2, GDBool used);
 
@@ -216,7 +219,6 @@ GDBool GDTriangleListContainsEdge(GDTriangleListRef triangleList, GDNodeID node1
 
 
 
-
 #pragma mark - Debugging
 
 void GDTriangleListPrint(GDTriangleListRef triangleList) {
@@ -228,6 +230,81 @@ void GDTriangleListPrint(GDTriangleListRef triangleList) {
     printf("%d \t", triangleList->values[valueIdx]);
   }
   printf("\n");
+  
+}
+
+
+#pragma mark - Serialization
+
+GDTriangleListRef GDTriangleListCreateFromData(char * bytes, unsigned long int length) {
+
+  GDTriangleListRef triangleList = malloc(sizeof(GDTriangleList));
+  
+  GDDataReaderRef reader = GDDataReaderCreateWithCapacity(bytes, length);
+  
+  unsigned int count = GDDataReaderReadUnsignedInt(reader);
+  unsigned int totalNodesCount = GDDataReaderReadUnsignedInt(reader);
+  triangleList->capacity = count;
+  triangleList->count = 0;
+  triangleList->edgesUsage = GDMatrixCreate(totalNodesCount, totalNodesCount);
+  triangleList->lastTriangleEdgesUsage = GDMatrixCreate(totalNodesCount, totalNodesCount);
+  
+  GDNodeID * values = malloc(sizeof(GDNodeID) * triangleList->capacity);
+  triangleList->values = values;
+  
+  for ( unsigned int itemIdx = 0; itemIdx < count; itemIdx++ ) {
+    unsigned int node = GDDataReaderReadUnsignedInt(reader);
+    GDTriangleListPush(triangleList, node);
+  }
+  
+  GDDataReaderRelease(reader);
+  
+  return triangleList;
+  
+}
+
+void GDTriangleListGetData(GDTriangleListRef triangleList, char ** bytes, unsigned long int * length) {
+
+  assert(bytes != NULL);
+  assert(length != NULL);
+  
+  size_t size = sizeof(unsigned int) * (2 + triangleList->count);
+  
+  GDDataWriterRef writer = GDDataWriterCreateWithCapacity(size);
+  
+  GDDataWriterWriteUnsignedInt(writer, triangleList->count);
+  GDDataWriterWriteUnsignedInt(writer, triangleList->edgesUsage->rowsCount);
+  
+  for ( unsigned int itemIdx = 0; itemIdx < triangleList->count; itemIdx++ ) {
+    GDDataWriterWriteUnsignedInt(writer, triangleList->values[itemIdx]);
+  }
+  
+  *bytes = writer->bytes;
+  *length = writer->lenght;
+  
+  GDDataWriterRelease(writer);
+  
+}
+
+
+#pragma mark - Helpers
+
+GDBool GDTriangleListEqual(GDTriangleListRef triangleList1, GDTriangleListRef triangleList2) {
+  
+  assert(triangleList1 != NULL);
+  assert(triangleList2 != NULL);
+  
+  if ( triangleList1->count != triangleList2->count ) {
+    return NO;
+  }
+  
+  for ( unsigned int itemIdx = 0; itemIdx < triangleList1->count; itemIdx++ ) {
+    if ( triangleList1->values[itemIdx] != triangleList2->values[itemIdx] ) {
+      return NO;
+    }
+  }
+  
+  return YES;
   
 }
 

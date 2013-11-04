@@ -46,4 +46,10 @@ int GDTriangleListGetNumberOfClosedTriangles(GDTriangleListRef triangleList);
 
 int GDTriangleListGetNotFinishedNodesCount(GDTriangleListRef triangleList);
 
+GDTriangleListRef GDTriangleListCreateFromData(char * bytes, unsigned long int length);
+
+void GDTriangleListGetData(GDTriangleListRef triangleList, char ** bytes, unsigned long int * length);
+
+GDBool GDTriangleListEqual(GDTriangleListRef triangleList1, GDTriangleListRef triangleList2);
+
 #endif

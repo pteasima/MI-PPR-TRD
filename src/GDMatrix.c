@@ -59,6 +59,30 @@ void GDMatrixFillWithZeros(GDMatrixRef matrix) {
   
 }
 
+GDBool GDMatrixEqual(GDMatrixRef matrix1, GDMatrixRef matrix2) {
+  
+  assert(matrix1 != NULL);
+  assert(matrix2 != NULL);
+  
+  if ( matrix1->rowsCount != matrix2->rowsCount ) {
+    return NO;
+  }
+  if ( matrix1->colsCount != matrix2->colsCount ) {
+    return NO;
+  }
+  
+  for ( unsigned int rowIdx = 0; rowIdx < matrix1->rowsCount; rowIdx++ ) {
+    for ( unsigned int colIdx = 0; colIdx < matrix1->colsCount; colIdx++) {
+      if ( matrix1->rows[rowIdx][colIdx] != matrix2->rows[rowIdx][colIdx] ) {
+        return NO;
+      }
+    }
+  }
+  
+  return YES;
+  
+}
+
 
 #pragma mark - Debug
 

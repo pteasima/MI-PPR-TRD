@@ -7,6 +7,8 @@
 #ifndef GraphDecomposition_GDMatrix_h
 #define GraphDecomposition_GDMatrix_h
 
+#include "GDDefines.h"
+
 typedef struct GDMatrix {
   
   unsigned int rowsCount;
@@ -24,5 +26,7 @@ void GDMatrixRelease(GDMatrixRef matrix);
 void GDMatrixFillWithZeros(GDMatrixRef matrix);
 
 void GDMatrixPrint(GDMatrixRef matrix);
+
+GDBool GDMatrixEqual(GDMatrixRef matrix1, GDMatrixRef matrix2);
 
 #endif
