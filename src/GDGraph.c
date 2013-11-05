@@ -152,6 +152,7 @@ GDGraphRef GDGraphCreateFromData(char * bytes, unsigned long int length) {
   for ( unsigned int edgeIdx = 0; edgeIdx < edgesCount; edgeIdx++ ) {
     unsigned node1 = GDDataReaderReadUnsignedInt(reader);
     unsigned node2 = GDDataReaderReadUnsignedInt(reader);
+	printf("Adding connection between nodes %d and %d\n", node1, node2);
     GDGraphAddConnection(graph, node1, node2);
   }
   

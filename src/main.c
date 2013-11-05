@@ -48,8 +48,8 @@
 GDExplorerRef explorer;
 GDGraphRef graph;
 
-void * graphBuffer;
-void * stackBuffer;
+char * graphBuffer;
+char * workBuffer;
 
 
 MPI_Request workRequest;
@@ -70,7 +70,7 @@ void initialize(const char * path) {
 	
 	//TODO determine correct buffer sizes.
 	graphBuffer = malloc(GRAPH_BUFFER_LENGTH * sizeof(MPI_BYTE));
-	stackBuffer = malloc(STACK_BUFFER_LENGTH * sizeof(MPI_BYTE));
+	workBuffer = malloc(STACK_BUFFER_LENGTH * sizeof(MPI_BYTE));
 	
 	if(myRank == 0){
 		graph = GDGraphCreateFromFile(path);
@@ -114,9 +114,7 @@ void initialize(const char * path) {
 	
 	if(myRank == 0){
 		printf("Initializing...\n");
-		GDExplorationStackRef stack = GDExplorationStackCreateWithCapacity(64);
-		GDExplorationStackAddAllNodes(stack, explorer->graph);
-		GDExplorerSetExplorationStack(explorer, stack);
+		GDExplorerInitializeWork(explorer);
 	}
 	//wait until all processes have received graph and p0 has initialized its stack
 	MPI_Barrier(MPI_COMM_WORLD);
@@ -158,11 +156,18 @@ void sendWork(int destination){
 	//-- GDExplorationStackSplit returns stack of length 0
 	//OR
 	//-- check originalStack->count here and send message of length 0 if count too small
-	GDExplorationStackRef originalStack = 	GDExplorerGetExplorationStack(explorer);
-	GDExplorationStackRef splitStack = GDExplorationStackSplit(originalStack);
-	GDExplorationStackGetData(splitStack, &stackBuffer, &length);
+//	GDExplorationStackRef originalStack = 	GDExplorerGetExplorationStack(explorer);
+//	GDExplorationStackRef splitStack = GDExplorationStackSplit(originalStack);
+//	GDExplorationStackGetData(splitStack, &stackBuffer, &length);
+	
+	GDBool hasWork = GDExplorerGetWork(explorer, &workBuffer, &length);
+	if(hasWork){
+			MPI_Isend(workBuffer, (int)length, MPI_BYTE, destination, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &sendWorkRequest);
+	}else{
+		MPI_Isend(NULL, 0, MPI_BYTE, destination, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &sendWorkRequest);
+	}
 
-	MPI_Isend(stackBuffer, (int)length, MPI_BYTE, destination, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &sendWorkRequest);
+	
 }
 
 void checkIncomingWorkRequests()
@@ -170,7 +175,7 @@ void checkIncomingWorkRequests()
 	//reads all pending work requests sequentially and responds to each
 	int flag = 0;
 	do{
-		//status can be local, theres no need to wait for previous requests since we using blocking Recv
+		//status can be local, theres no need to wait for previous requests since we are using blocking Recv
 		MPI_Status status;
 		MPI_Iprobe(MPI_ANY_SOURCE, WORK_REQUEST_TAG, MPI_COMM_WORLD, &flag, &status);
 		if(flag){
@@ -191,7 +196,7 @@ void askForWork();
 
 void receiveWork(){
 	//blocking receive - new work or message of length 0
-	MPI_Recv(&stackBuffer, STACK_BUFFER_LENGTH, MPI_BYTE, MPI_ANY_SOURCE, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &workRequestStatus);
+	MPI_Recv(&workBuffer, STACK_BUFFER_LENGTH, MPI_BYTE, MPI_ANY_SOURCE, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &workRequestStatus);
 	int count = 0;
 	MPI_Get_count(&workRequestStatus, MPI_BYTE, &count);
 	//no work received, ask someone else
@@ -199,8 +204,8 @@ void receiveWork(){
 	if(count == 0){
 		askForWork();
 	}else{
-		GDExplorationStackRef newStack = GDExplorationStackhCreateFromData(stackBuffer, count);
-		GDExplorerSetExplorationStack(explorer, newStack);
+//		GDExplorationStackRef newStack = GDExplorationStackCreateFromData(workBuffer, count);
+		GDExplorerSetWork(explorer, workBuffer, count);
 	}
 	
 }
@@ -315,15 +320,15 @@ int main(int argc, char * argv[]) {
 	
 	//buffery pevne velikosti alokovane v initialize(), odstranit pokud vyresim alokaci bufferu pred kazdym recv
 	free(graphBuffer);
-	free(stackBuffer);
+	free(workBuffer);
 	
 	
 	//finalize MPI
 	MPI_Finalize();
-  
-#warning <#message#>
-  GDExplorerDataDistributionTestsRun();
-  GDAlgorithmTestsRun();
+//  
+//#warning <#message#>
+//  GDExplorerDataDistributionTestsRun();
+//  GDAlgorithmTestsRun();
   
 	return 0;
 	
