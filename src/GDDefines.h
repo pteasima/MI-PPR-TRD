@@ -2,7 +2,8 @@
 //  GDDefines.h
 //  GraphDecomposition
 //
- 
+
+
 
 #ifndef GraphDecomposition_GDDefines_h
 #define GraphDecomposition_GDDefines_h

@@ -17,18 +17,19 @@
 #include <string.h>
 #include <unistd.h>
 
-#pragma mark - General
 
-#define WORK_REQUEST_TAG 1
-#define WORK_RESPONSE_TAG 2
-#define GRAPH_TAG 3
-
-
-#define GRAPH_BUFFER_LENGTH 1024
-#define STACK_BUFFER_LENGTH 1024
-
-#define EXPLORER_RUN_MAX_STEPS 200
-
+void waitForPreviousWorkProbeRequest();
+void waitForPreviousWorkRequest();
+void waitForPreviousSendWorkRequest();
+void sendWork(int destination);
+void checkIncomingWorkRequests();
+void receiveWork();
+void askForWork();
+void checkMail();
+void cleanUpSentWorks();
+void initialize(const char * path);
+void runLoop();
+void finalize();
 
 /*
  
@@ -45,23 +46,72 @@
  4. TODO:logika posilani tokenu musi byt soucasti run loopu, finalize udela az redukci vysledku
  */
 
+
+#define PRINTLOCATION printf("file: %s, function: %s, line: %d\n",__FILE__, __FUNCTION__, __LINE__)
+#define PRINTPROCESSANDLOCATION printf("--- p%d   |   file: %s, function: %s, line: %d\n", myRank ,__FILE__, __FUNCTION__, __LINE__)
+
+#pragma mark - Constants
+
+#define EXPLORER_RUN_MAX_STEPS 200
+
+
+#pragma mark - Vars
+
 GDExplorerRef explorer;
 GDGraphRef graph;
-
-char * graphBuffer;
-char * workBuffer;
-
-
-MPI_Request workRequest;
-MPI_Status workRequestStatus;
-
-MPI_Request sendWorkRequest;
-MPI_Status sendWorkStatus;
-
 
 int myRank;
 int processCount;
 
+#pragma mark - Main
+
+int main(int argc, char * argv[]) {
+	
+	
+	
+	if ( argc != 2 ) {
+		printf("Invalid number of arguments\n");
+		return 0;
+	}
+	MPI_Init(&argc, &argv);
+	//		sleep(3);
+	
+	const char * path = argv[1];
+	
+	initialize(path);
+	runLoop();
+	finalize();
+	
+	GDExplorerRelease(explorer);
+	
+	GDGraphRelease(graph);
+	
+	//buffery pevne velikosti alokovane v initialize(), odstranit pokud vyresim alokaci bufferu pred kazdym recv
+	//	free(graphBuffer);
+	
+	
+	//finalize MPI
+	MPI_Finalize();
+	//
+	//#warning <#message#>
+	//  GDExplorerDataDistributionTestsRun();
+	//  GDAlgorithmTestsRun();
+	
+	return 0;
+	
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark - Constants
+
+#define GRAPH_TAG 3
+
+#define GRAPH_BUFFER_LENGTH 1024
+
+
+#pragma mark - Init
 
 void initialize(const char * path) {
 	//init MPI
@@ -69,8 +119,6 @@ void initialize(const char * path) {
 	MPI_Comm_size(MPI_COMM_WORLD, &processCount);
 	
 	//TODO determine correct buffer sizes.
-	graphBuffer = malloc(GRAPH_BUFFER_LENGTH * sizeof(MPI_BYTE));
-	workBuffer = malloc(STACK_BUFFER_LENGTH * sizeof(MPI_BYTE));
 	
 	if(myRank == 0){
 		graph = GDGraphCreateFromFile(path);
@@ -86,30 +134,23 @@ void initialize(const char * path) {
 		
 		//this code distributes the graph among all processes in O(processCount) steps, it could be done in O(log(processCount)) steps.
 		unsigned long length = 0;
-		GDGraphGetData(graph, &graphBuffer, &length);
+		char *graphData;
+		GDGraphGetData(graph, &graphData, &length);
 		int i;
-		MPI_Request sendGraphRequest = NULL;
-		MPI_Status sendGraphStatus;
 		for (i = 1; i < processCount; i++) {
-			//TODO handle too large messages if needed
-
-			//wait for previous request to finish
-			if (sendGraphRequest != NULL) {
-				MPI_Wait(&sendGraphRequest, &sendGraphStatus);
-			}
-			
-			
-			MPI_Isend(graphBuffer, (int)length, MPI_BYTE, i, GRAPH_TAG, MPI_COMM_WORLD, &sendGraphRequest);
+			MPI_Send(graphData, (int)length, MPI_BYTE, i, GRAPH_TAG, MPI_COMM_WORLD);
 		}
 	}else{
 		MPI_Status recvGraphStatus;
-		MPI_Recv(graphBuffer, GRAPH_BUFFER_LENGTH, MPI_BYTE, MPI_ANY_SOURCE, GRAPH_TAG, MPI_COMM_WORLD, &recvGraphStatus);
+		char *graphData;
+		graphData = malloc(GRAPH_BUFFER_LENGTH * sizeof(MPI_BYTE));
+		MPI_Recv(graphData, GRAPH_BUFFER_LENGTH, MPI_BYTE, MPI_ANY_SOURCE, GRAPH_TAG, MPI_COMM_WORLD, &recvGraphStatus);
 		int actualLength = -1;
 		MPI_Get_count(&recvGraphStatus, MPI_BYTE, &actualLength);
-		graph = GDGraphCreateFromData(graphBuffer, actualLength);
+		graph = GDGraphCreateFromData(graphData, actualLength);
 	}
 	
-	GDExplorerRef explorer = GDExplorerCreate(graph);
+	explorer = GDExplorerCreate(graph);
 	
 	
 	if(myRank == 0){
@@ -117,9 +158,9 @@ void initialize(const char * path) {
 		GDExplorerInitializeWork(explorer);
 	}
 	//wait until all processes have received graph and p0 has initialized its stack
-	MPI_Barrier(MPI_COMM_WORLD);
+
 	if(myRank == 0) printf("processes can now ask for work.\n");
-	
+	MPI_Barrier(MPI_COMM_WORLD);
 	/*
 	 
 	 TODO
@@ -132,131 +173,78 @@ void initialize(const char * path) {
 	
 }
 
-//wait for previous work request to finish
-void waitForPreviousWorkRequest()
-{
-	MPI_Wait(&workRequest, &workRequestStatus);
-}
 
-//wait for previous send work request to finish
-void waitForPreviousSendWorkRequest()
-{
-	MPI_Wait(&sendWorkRequest, &sendWorkStatus);
-}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#pragma mark - Constants
 
+#define WORK_REQUEST_TAG 1
+#define WORK_RESPONSE_TAG 2
 
-void sendWork(int destination){
-	waitForPreviousSendWorkRequest();
-	
-	// do we need unsinged long? Max mpi message length is INT_MAX. Sending larger stacks would require chaining messages or defining a contiguous data type (http://stackoverflow.com/questions/13558861/maximum-amount-of-data-that-can-be-sent-using-mpisend)
-	unsigned long length = 0;
-	
-	//TODO where to put optimization logic? - do not split and send a stack that is already small
-	//-- GDExplorationStackSplit returns stack of length 0
-	//OR
-	//-- check originalStack->count here and send message of length 0 if count too small
-//	GDExplorationStackRef originalStack = 	GDExplorerGetExplorationStack(explorer);
-//	GDExplorationStackRef splitStack = GDExplorationStackSplit(originalStack);
-//	GDExplorationStackGetData(splitStack, &stackBuffer, &length);
-	
-	GDBool hasWork = GDExplorerGetWork(explorer, &workBuffer, &length);
-	if(hasWork){
-			MPI_Isend(workBuffer, (int)length, MPI_BYTE, destination, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &sendWorkRequest);
-	}else{
-		MPI_Isend(NULL, 0, MPI_BYTE, destination, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &sendWorkRequest);
-	}
+#define STACK_BUFFER_LENGTH 1024
 
-	
-}
+#pragma mark - Vars
 
-void checkIncomingWorkRequests()
-{
-	//reads all pending work requests sequentially and responds to each
-	int flag = 0;
-	do{
-		//status can be local, theres no need to wait for previous requests since we are using blocking Recv
-		MPI_Status status;
-		MPI_Iprobe(MPI_ANY_SOURCE, WORK_REQUEST_TAG, MPI_COMM_WORLD, &flag, &status);
-		if(flag){
-			
-			int length = 0;
-			MPI_Recv(NULL, 0, MPI_CHAR, MPI_ANY_SOURCE, WORK_REQUEST_TAG, MPI_COMM_WORLD, &status);
-			MPI_Get_count(&status, MPI_CHAR, &length);
-			int source = status.MPI_SOURCE;
-			printf("process %d received work request from process %d\n", myRank, source);
-//			printf ("Message status: source=%d, tag=%d, error=%d, length=%d\n",source, status.MPI_TAG, status.MPI_ERROR, length);
+char * workBuffer;
 
-			sendWork(source);
-		}
-	}while(flag);
-}
+typedef struct SendWorkData {
+	MPI_Request request;
+	char *buffer;
+} SendWorkData;
+typedef SendWorkData* SendWorkDataRef;
 
-void askForWork();
-
-void receiveWork(){
-	//blocking receive - new work or message of length 0
-	MPI_Recv(&workBuffer, STACK_BUFFER_LENGTH, MPI_BYTE, MPI_ANY_SOURCE, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &workRequestStatus);
-	int count = 0;
-	MPI_Get_count(&workRequestStatus, MPI_BYTE, &count);
-	//no work received, ask someone else
-	//TODO this solution might not be consistent with token logic - could lead to a deadlock (everyone asking everyone else for work indefinitelly)
-	if(count == 0){
-		askForWork();
-	}else{
-//		GDExplorationStackRef newStack = GDExplorationStackCreateFromData(workBuffer, count);
-		GDExplorerSetWork(explorer, workBuffer, count);
-	}
-	
+void SendWorkDataRelease(SendWorkDataRef data){
+	free(data->buffer);
+	data->buffer = NULL;
+	data->request = NULL;
 }
 
 
-void askForWork()
-{
-	//randomly generate destination process number (different from self)
-	//room for optimization - at least dont ask the same process twice in a row
-	int destination;
-	do {
-		destination = rand() % processCount;
-	} while (destination == myRank);
-	
-	printf("process %d sending work request to process %d.\n", myRank, destination);
-	MPI_Isend(NULL, 0, MPI_CHAR, destination, WORK_REQUEST_TAG, MPI_COMM_WORLD, &workRequest);
-	//theres no point continuing until i have successfully asked for work
-	waitForPreviousWorkRequest();
-	
-	receiveWork();
-}
 
-void checkMail()
-{
-	checkIncomingWorkRequests();
-}
+SendWorkData *sentWorks;
 
+
+
+
+#pragma mark - RumLoop
 
 void runLoop() {
 	
-	if(myRank == 0){
-		printf("Finding best solution...\n");
+	//initialize array of SendWorkDataRefs
+	sentWorks = malloc(processCount * sizeof(SendWorkData));
+	for (int i = 0; i < processCount; i++) {
+		sentWorks[i].request = NULL;
+		sentWorks[i].buffer = NULL;
 	}
 	
+	workBuffer = malloc(STACK_BUFFER_LENGTH * sizeof(MPI_BYTE));
 	
-	while ( YES ) {
-		
-		checkMail();
-		
-		GDBool canExistBetterSolution;
-		GDExplorerRun(explorer, EXPLORER_RUN_MAX_STEPS, &canExistBetterSolution);
-		
+	
+	GDBool isMainWorker = myRank == 0;
+	
+	if ( isMainWorker ){
+		printf("Finding best solution...\n");
+	}
 
-		if (explorer->explorationStack->count == 0 || canExistBetterSolution == NO) {
-			if (myRank == 0) {
-					//TODO zacit ukoncovani
+	while ( YES ) {
+
+	
+		GDBool canExistBetterSolution;
+		printf("p%d running explorer\n", myRank);
+		GDExplorerRun(explorer, EXPLORER_RUN_MAX_STEPS, &canExistBetterSolution);
+		GDBool hasWork = explorer->explorationStack->count > 0;
+		if ( !hasWork || !canExistBetterSolution ) {
+			if ( isMainWorker ) {
+				//TODO zacit ukoncovani
 			}
 			askForWork();
 		}
-		
+		checkIncomingWorkRequests();
+		cleanUpSentWorks();
 	}
+	
+	free(workBuffer);
+	free(sentWorks);
 	
 	/*
 	 
@@ -278,6 +266,122 @@ void runLoop() {
 	
 }
 
+#pragma mark - Termination (Token)
+
+
+#pragma mark - Check Work Request
+
+void checkIncomingWorkRequests() {
+	
+	//reads all pending work requests sequentially and responds to each
+	int flag = 0;
+	do{
+		MPI_Status workProbeStatus;
+		MPI_Iprobe(MPI_ANY_SOURCE, WORK_REQUEST_TAG, MPI_COMM_WORLD, &flag, &workProbeStatus);
+		
+		if(flag){
+			int length = 0;
+			MPI_Status status;
+			char dummyReceiveBuffer;
+			MPI_Recv(&dummyReceiveBuffer, 1, MPI_CHAR, workProbeStatus.MPI_SOURCE, workProbeStatus.MPI_TAG, MPI_COMM_WORLD, &status);
+			MPI_Get_count(&status, MPI_CHAR, &length);
+			int source = status.MPI_SOURCE;
+			printf("p%d received work request from p%d\n", myRank, source);
+			sendWork(source);
+		}
+	}while(flag);
+}
+
+void sendWork(int destination) {
+	
+	//it is possible (although unlikely), that process 'destination' is asking for more work before we have freed buffer from previous send work request
+	SendWorkDataRef previousSendWorkData = &(sentWorks[destination]);
+	if(previousSendWorkData){
+		SendWorkDataRelease(previousSendWorkData);
+		previousSendWorkData = NULL;
+	}
+	
+	
+	// do we need unsinged long? Max mpi message length is INT_MAX. Sending larger stacks would require chaining messages or defining a contiguous data type (http://stackoverflow.com/questions/13558861/maximum-amount-of-data-that-can-be-sent-using-mpisend)
+	unsigned long length = 0;
+	
+
+	SendWorkData sendWorkData;
+	GDBool hasWork = GDExplorerGetWork(explorer, &sendWorkData.buffer, &length);
+	if(hasWork){
+		printf("p%d sending work of length %d to p%d\n", myRank, (int)length, destination);
+		MPI_Isend(sendWorkData.buffer, (int)length, MPI_BYTE, destination, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &(sendWorkData.request));
+		//save sendWorkData struct for later release;
+		sentWorks[destination] = sendWorkData;
+	}else{
+		printf("p%d doesnt have enough work to share, informing p%d...\n", myRank, destination);
+		MPI_Isend(&myRank, 1, MPI_BYTE, destination, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &(sendWorkData.request));
+	}
+	
+	
+}
+
+
+void cleanUpSentWorks() {
+	for (int i = 0; i < processCount; i++) {
+		SendWorkDataRef data = &(sentWorks[i]);
+		if(!(data -> request)) continue; //either we havent sent anything to process 'i' or the send buffer has already been freed
+	
+		int isRequestFinished;
+		MPI_Test(&(data->request), &isRequestFinished, MPI_STATUS_IGNORE);
+		if(isRequestFinished){
+			printf("p%d releasing buffer for sending data to p%d\n",myRank, i);
+			SendWorkDataRelease(data);
+			data = NULL;
+		}else{
+			printf("p%d cant yet release buffer for sending data to p%d, request hasnt finished\n",myRank, i);
+		}
+	}
+}
+
+
+#pragma mark - Work In
+
+void askForWork() {
+	//randomly generate destination process number (different from self)
+	//room for optimization - at least dont ask the same process twice in a row
+	int destination;
+//	do {
+//		destination = rand() % processCount;
+//	} while (destination == myRank);
+	destination = (myRank +1) %processCount;
+	
+	printf("p%d asking p%d for work.\n", myRank, destination);
+	MPI_Send(&myRank, 1, MPI_CHAR, destination, WORK_REQUEST_TAG, MPI_COMM_WORLD);
+	//theres no point continuing until i have successfully asked for work
+	
+	receiveWork();
+}
+
+void receiveWork(){
+	MPI_Status workRequestStatus;
+	//blocking receive - new work or message of length 0
+	MPI_Recv(workBuffer, STACK_BUFFER_LENGTH, MPI_BYTE, MPI_ANY_SOURCE, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &workRequestStatus);
+	int count = 0;
+	MPI_Get_count(&workRequestStatus, MPI_BYTE, &count);
+	//no work received, ask someone else
+	//TODO this solution might not be consistent with token logic - could lead to a deadlock (everyone asking everyone else for work indefinitelly)
+	if(count == 1){
+		printf("p%d didnt receive any work from p%d, asking again\n", myRank, workRequestStatus.MPI_SOURCE);
+		askForWork();
+	}else{
+		//		GDExplorationStackRef newStack = GDExplorationStackCreateFromData(workBuffer, count);
+		printf("p%d received work of length %d from p%d\n", myRank, count, workRequestStatus.MPI_SOURCE);
+		GDExplorerSetWork(explorer, workBuffer, count);
+	}
+	
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma mark - Finish
+
 void finalize() {
 	
 	printf("Finalizing...\n");
@@ -296,43 +400,7 @@ void finalize() {
 }
 
 
-
-#pragma mark - Main
-
-int main(int argc, char * argv[]) {
-	
-	if ( argc != 2 ) {
-		printf("Invalid number of arguments\n");
-		return 0;
-	}
-	MPI_Init(&argc, &argv);
-	
-	
-	const char * path = argv[1];
-		
-	initialize(path);
-	runLoop();
-	finalize();
-	
-	GDExplorerRelease(explorer);
-	
-	GDGraphRelease(graph);
-	
-	//buffery pevne velikosti alokovane v initialize(), odstranit pokud vyresim alokaci bufferu pred kazdym recv
-	free(graphBuffer);
-	free(workBuffer);
-	
-	
-	//finalize MPI
-	MPI_Finalize();
-//  
-//#warning <#message#>
-//  GDExplorerDataDistributionTestsRun();
-//  GDAlgorithmTestsRun();
-  
-	return 0;
-	
-}
+#pragma mark - Best Solution Reduction
 
 
 

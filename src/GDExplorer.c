@@ -17,6 +17,7 @@
 #include "GDDataWriter.h"
 #include "GDDataReader.h"
 
+
 #pragma mark - Private Interfaces
 
 void processState(GDExplorerRef explorer, GDExplorationStackItem state);
@@ -307,15 +308,13 @@ GDBool GDExplorerGetWork(GDExplorerRef explorer, char ** bytes, unsigned long in
 }
 
 void GDExplorerSetWork(GDExplorerRef explorer, char * bytes, unsigned long int lenght) {
-  
+	
   GDDataReaderRef reader = GDDataReaderCreateWithCapacity(bytes, lenght);
-  
   unsigned long int triangleListLenght = GDDataReaderReadUnsignedLongInt(reader);
   char * triangleListBytes;
   GDDataReaderReadBytes(reader, triangleListLenght, &triangleListBytes);
   GDTriangleListRef triangleList = GDTriangleListCreateFromData(triangleListBytes, triangleListLenght);
   free(triangleListBytes);
-  
   unsigned long int stackLenght = GDDataReaderReadUnsignedLongInt(reader);
   char * stackBytes;
   GDDataReaderReadBytes(reader, stackLenght, &stackBytes);
@@ -326,7 +325,6 @@ void GDExplorerSetWork(GDExplorerRef explorer, char * bytes, unsigned long int l
   GDExplorationStackRelease(explorer->explorationStack);
   explorer->triangleList = triangleList;
   explorer->explorationStack = stack;
-  
 }
 
 

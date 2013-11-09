@@ -89,7 +89,6 @@ GDGraphRef GDGraphCreateFromFile(const char * path) {
       }
       if ( rowIdx != colIdx && readChar == '1' ){
         GDGraphAddConnection(graph, rowIdx, colIdx);
-        graph->edgesCount++;
       }
       
     }
@@ -123,6 +122,9 @@ void GDGraphAddConnection(GDGraphRef graph, GDNodeID node1, GDNodeID node2) {
   assert(node1 < graph->nodesCount);
   assert(node2 < graph->nodesCount);
   
+if ( GDGraphHasConnection(graph, node1, node2) ) {
+			return;
+	}
   graph->adjacencyMatrix->rows[node1][node2] = 1;
   graph->adjacencyMatrix->rows[node2][node1] = 1;
   graph->edgesCount = graph->edgesCount + 1;
@@ -152,7 +154,6 @@ GDGraphRef GDGraphCreateFromData(char * bytes, unsigned long int length) {
   for ( unsigned int edgeIdx = 0; edgeIdx < edgesCount; edgeIdx++ ) {
     unsigned node1 = GDDataReaderReadUnsignedInt(reader);
     unsigned node2 = GDDataReaderReadUnsignedInt(reader);
-	printf("Adding connection between nodes %d and %d\n", node1, node2);
     GDGraphAddConnection(graph, node1, node2);
   }
   

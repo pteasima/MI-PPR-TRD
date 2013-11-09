@@ -54,12 +54,10 @@ unsigned int GDDataReaderReadUnsignedInt(GDDataReaderRef dataReader) {
 unsigned long int GDDataReaderReadUnsignedLongInt(GDDataReaderRef dataReader) {
   
   size_t bytesCount = sizeof(unsigned long int);
-  
   unsigned long int value = 0;
   for ( size_t byteOffset = 0; byteOffset < bytesCount; byteOffset++ ) {
     value |= (dataReader->bytes[dataReader->position + byteOffset] & 0xFF) << (8 * byteOffset);
   }
-  
   dataReader->position += bytesCount;
   
   return value;
