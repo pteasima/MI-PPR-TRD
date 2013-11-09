@@ -16,6 +16,7 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <assert.h>
 
 
 void waitForPreviousWorkProbeRequest();
@@ -25,8 +26,11 @@ void sendWork(int destination);
 void checkIncomingWorkRequests();
 void receiveWork();
 void askForWork();
-void checkMail();
 void cleanUpSentWorks();
+void checkToken();
+void terminateWork();
+GDBool checkWorkEnd();
+void sendToken();
 void initialize(const char * path);
 void runLoop();
 void finalize();
@@ -180,6 +184,21 @@ void initialize(const char * path) {
 
 #define WORK_REQUEST_TAG 1
 #define WORK_RESPONSE_TAG 2
+#define TOKEN_TAG 3
+#define END_WORK_TAG 4
+
+typedef char Color;
+#define BLACK 0
+#define WHITE 1
+
+GDBool hasToken;
+Color tokenColor = WHITE;
+Color processColor = WHITE;
+
+GDBool isIdle = NO;
+
+GDBool shouldTerminate = NO;
+
 
 #define STACK_BUFFER_LENGTH 1024
 
@@ -224,6 +243,10 @@ void runLoop() {
 	
 	if ( isMainWorker ){
 		printf("Finding best solution...\n");
+		
+		hasToken = YES;
+	}else{
+		hasToken = NO;
 	}
 
 	while ( YES ) {
@@ -233,15 +256,30 @@ void runLoop() {
 		printf("p%d running explorer\n", myRank);
 		GDExplorerRun(explorer, EXPLORER_RUN_MAX_STEPS, &canExistBetterSolution);
 		GDBool hasWork = explorer->explorationStack->count > 0;
+		
 		if ( !hasWork || !canExistBetterSolution ) {
-			if ( isMainWorker ) {
-				//TODO zacit ukoncovani
+			
+			//found globally best solution, inform others to terminate
+			if(!canExistBetterSolution){
+				terminateWork();
+			}
+			if(hasToken){
+				sendToken();
 			}
 			askForWork();
 		}
 		checkIncomingWorkRequests();
 		cleanUpSentWorks();
+		checkToken();
+		
+		if(checkWorkEnd()){
+			break;
+		}
+		
 	}
+	
+	printf("--------------------------------\n");
+	printf("p%d terminating runLoop\n", myRank);
 	
 	free(workBuffer);
 	free(sentWorks);
@@ -313,6 +351,11 @@ void sendWork(int destination) {
 		MPI_Isend(sendWorkData.buffer, (int)length, MPI_BYTE, destination, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &(sendWorkData.request));
 		//save sendWorkData struct for later release;
 		sentWorks[destination] = sendWorkData;
+		
+		//if sending work to lower cpu rank, set own color to BLACK
+		if(destination < myRank){
+			processColor = BLACK;
+		}
 	}else{
 		printf("p%d doesnt have enough work to share, informing p%d...\n", myRank, destination);
 		MPI_Isend(&myRank, 1, MPI_BYTE, destination, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &(sendWorkData.request));
@@ -346,37 +389,115 @@ void askForWork() {
 	//randomly generate destination process number (different from self)
 	//room for optimization - at least dont ask the same process twice in a row
 	int destination;
-//	do {
-//		destination = rand() % processCount;
-//	} while (destination == myRank);
 	destination = (myRank +1) %processCount;
 	
 	printf("p%d asking p%d for work.\n", myRank, destination);
 	MPI_Send(&myRank, 1, MPI_CHAR, destination, WORK_REQUEST_TAG, MPI_COMM_WORLD);
 	//theres no point continuing until i have successfully asked for work
-	
+	isIdle = YES;
 	receiveWork();
 }
 
 void receiveWork(){
-	MPI_Status workRequestStatus;
-	//blocking receive - new work or message of length 0
-	MPI_Recv(workBuffer, STACK_BUFFER_LENGTH, MPI_BYTE, MPI_ANY_SOURCE, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &workRequestStatus);
-	int count = 0;
-	MPI_Get_count(&workRequestStatus, MPI_BYTE, &count);
-	//no work received, ask someone else
-	//TODO this solution might not be consistent with token logic - could lead to a deadlock (everyone asking everyone else for work indefinitelly)
-	if(count == 1){
-		printf("p%d didnt receive any work from p%d, asking again\n", myRank, workRequestStatus.MPI_SOURCE);
-		askForWork();
-	}else{
-		//		GDExplorationStackRef newStack = GDExplorationStackCreateFromData(workBuffer, count);
-		printf("p%d received work of length %d from p%d\n", myRank, count, workRequestStatus.MPI_SOURCE);
-		GDExplorerSetWork(explorer, workBuffer, count);
+	
+	int isWorkAvailable;
+	do {
+		checkToken();
+		if (shouldTerminate) return;
+		
+		
+		MPI_Status workProbeStatus;
+		
+		MPI_Iprobe(MPI_ANY_SOURCE, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &isWorkAvailable, &workProbeStatus);
+		if(isWorkAvailable){
+			
+			MPI_Status workRequestStatus;
+			//blocking receive - new work or message of length 0
+			MPI_Recv(workBuffer, STACK_BUFFER_LENGTH, MPI_BYTE, workProbeStatus.MPI_SOURCE, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &workRequestStatus);
+			int count = 0;
+			MPI_Get_count(&workRequestStatus, MPI_BYTE, &count);
+			//no work received, check work end
+			if(count == 1){
+				if(checkWorkEnd()){
+					return;
+				}
+				//ask someone else
+				printf("p%d didnt receive any work from p%d, asking again\n", myRank, workRequestStatus.MPI_SOURCE);
+				askForWork();
+			}else{
+				//		GDExplorationStackRef newStack = GDExplorationStackCreateFromData(workBuffer, count);
+				printf("p%d received work of length %d from p%d\n", myRank, count, workRequestStatus.MPI_SOURCE);
+				GDExplorerSetWork(explorer, workBuffer, count);
+			}
+		}
+		
+	} while (!isWorkAvailable);
+	
+	
+}
+
+#pragma mark - Token
+
+void terminateWork(){
+	shouldTerminate = YES;
+	printf("----------------------------------------------------------------\n");
+	printf ("p%d decided to terminate work, informing others..\n", myRank);
+	for (int i = 0; i < processCount; i++){
+		if(i == myRank) continue;
+		MPI_Send(&myRank, 1, MPI_INT, i, END_WORK_TAG, MPI_COMM_WORLD);
 	}
 	
 }
 
+void checkToken() {
+	MPI_Status tokenProbeStatus;
+	int isTokenIncoming;
+	MPI_Iprobe(MPI_ANY_SOURCE, TOKEN_TAG, MPI_COMM_WORLD, &isTokenIncoming, &tokenProbeStatus);
+	if(isTokenIncoming){
+		MPI_Status tokenReceiveStatus;
+		MPI_Recv(&tokenColor, 1, MPI_BYTE, tokenProbeStatus.MPI_SOURCE, TOKEN_TAG, MPI_COMM_WORLD, &tokenReceiveStatus);
+		
+			printf("p%d received token of color %s from p%d\n", myRank, (tokenColor == WHITE)? "white" : "black", tokenReceiveStatus.MPI_SOURCE);
+		hasToken = YES;
+		
+		GDBool isMainWorker = myRank == 0;
+		if(isMainWorker && tokenColor == WHITE){
+			terminateWork();
+			return;
+		}else if (processColor == BLACK){
+			tokenColor = BLACK;
+		}
+		
+		if(isIdle){
+			sendToken();
+		}
+		
+	}
+}
+
+void sendToken(){
+	assert(hasToken);
+	GDBool isMainWorker = myRank == 0;
+	int destination = (myRank + 1) % processCount;
+	
+	if(isMainWorker){
+		tokenColor = WHITE;
+	}
+	printf("p%d sending token of color %s to p%d\n", myRank, (tokenColor == WHITE)? "white" : "black", destination);
+	MPI_Send(&tokenColor, 1, MPI_BYTE, destination, TOKEN_TAG, MPI_COMM_WORLD);
+	hasToken = NO;
+	processColor = WHITE;
+}
+
+GDBool checkWorkEnd(){
+
+	if(shouldTerminate) return YES;
+	int flag;
+	MPI_Iprobe(MPI_ANY_SOURCE, END_WORK_TAG, MPI_COMM_WORLD, &flag, MPI_STATUS_IGNORE);
+	shouldTerminate = flag;
+	
+	return  shouldTerminate;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -384,8 +505,20 @@ void receiveWork(){
 
 void finalize() {
 	
+
+	//receive all solutions, print best
+	
+//	GDBool isMainWorker = myRank == 0;
+//	if(isMainWorker){
+//		GDSolutionRef *solutions = malloc(processCount *sizeof(GDSolutionRef));
+//		for (int i = 1; i < processCount; i++) {
+//			MPI_Recv(<#void *buf#>, <#int count#>, <#MPI_Datatype datatype#>, <#int source#>, <#int tag#>, <#MPI_Comm comm#>, <#MPI_Status *status#>)
+//		}
+//	}
+//	
 	printf("Finalizing...\n");
 	GDSolutionPrint(explorer->bestSolution);
+	
 	
 	/*
 	 
