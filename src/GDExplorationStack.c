@@ -2,7 +2,7 @@
 //  GDExplorationStack.c
 //  GraphDecomposition
 //
- 
+
 
 #include "GDExplorationStack.h"
 #include <stdio.h>
@@ -28,8 +28,6 @@ GDExplorationStackItem GDExplorationStackCreateItem(unsigned int level, GDNodeID
 
 GDExplorationStackRef GDExplorationStackCreateWithCapacity(unsigned int initialCapcity) {
   
-  assert(initialCapcity > 0);
-  
   GDExplorationStackRef stack = malloc(sizeof(GDExplorationStack));
   
   GDExplorationStackItem * values = malloc(sizeof(GDExplorationStackItem) * initialCapcity);
@@ -53,7 +51,13 @@ void GDExplorationStackRelease(GDExplorationStackRef stack) {
 
 void GDExplorationStackExtendCapacity(GDExplorationStackRef stack) {
   
-  unsigned int newCapacity = stack->capacity * 2;
+  unsigned int newCapacity;
+  if ( stack->capacity == 0 ) {
+    newCapacity = 2;
+  } else {
+    newCapacity = stack->capacity * 2;
+  }
+  
   stack->values = realloc(stack->values, sizeof(GDExplorationStackItem) * newCapacity);
   stack->capacity = newCapacity;
   
@@ -108,7 +112,7 @@ GDExplorationStackRef GDExplorationStackCreateFromData(char * bytes, unsigned lo
   
   GDExplorationStackItem * values = malloc(sizeof(GDExplorationStackItem) * stack->capacity);
   stack->values = values;
-
+  
   for ( unsigned int itemIdx = 0; itemIdx < stack->count; itemIdx++ ) {
     stack->values[itemIdx].level = GDDataReaderReadUnsignedInt(reader);
     stack->values[itemIdx].node = GDDataReaderReadUnsignedInt(reader);
@@ -147,7 +151,7 @@ void GDExplorationStackGetData(GDExplorationStackRef stack, char ** bytes, unsig
 #pragma mark - Split
 
 unsigned int GDExplorationStackNumberOfNodesAtLevel(GDExplorationStackRef stack, unsigned int level) {
-
+  
   unsigned int count = 0;
   GDBool iterated = NO;
   for ( unsigned int itemIdx = 0 ; itemIdx < stack->count; itemIdx++ ) {
@@ -165,10 +169,10 @@ unsigned int GDExplorationStackNumberOfNodesAtLevel(GDExplorationStackRef stack,
 }
 
 GDExplorationStackRef GDExplorationStackSplit(GDExplorationStackRef stack) {
-
+  
   GDExplorationStackRef halfStack1 = GDExplorationStackCreateWithCapacity(stack->count / 2);
   GDExplorationStackRef halfStack2 = GDExplorationStackCreateWithCapacity(stack->count - halfStack1->capacity);
-
+  
   unsigned int currentLevel = -1;
   unsigned int currentLevelNodeIdx = 0;
   unsigned int currentLevelNodesCount = 0;
@@ -180,7 +184,7 @@ GDExplorationStackRef GDExplorationStackSplit(GDExplorationStackRef stack) {
       currentLevelNodeIdx = 0;
     }
     
-    if ( currentLevelNodeIdx < currentLevelNodesCount / 2 ) {
+    if ( currentLevelNodeIdx <= (currentLevelNodesCount / 2) ) {
       GDExplorationStackPush(halfStack1, (GDExplorationStackItem){currentLevel, stack->values[itemIdx].node});
     } else {
       GDExplorationStackPush(halfStack2, (GDExplorationStackItem){currentLevel, stack->values[itemIdx].node});
@@ -189,7 +193,7 @@ GDExplorationStackRef GDExplorationStackSplit(GDExplorationStackRef stack) {
     currentLevelNodeIdx++;
     
   }
-
+  
   free(stack->values);
   stack->values = halfStack1->values;
   stack->count = halfStack1->count;

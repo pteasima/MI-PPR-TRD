@@ -222,21 +222,25 @@ GDBool testWorkMove() {
   
   GDExplorerRef explorerSource = GDExplorerCreate(graph);
   GDExplorerInitializeWork(explorerSource);
-  GDExplorerRef explorerDestination = GDExplorerCreate(graph);
-  
+
   char * bytes;
   unsigned long int lenght;
   GDBool hasWork = GDExplorerGetWork(explorerSource, &bytes, &lenght);
   if ( hasWork ) {
     
+    GDExplorerRef explorerDestination = GDExplorerCreate(graph);
+    
     GDExplorerSetWork(explorerDestination, bytes, lenght);
     free(bytes);
     
-    success = explorerDestination->explorationStack->count == 2 &&
+    success = explorerDestination->explorationStack->count == 1 &&
     explorerDestination->explorationStack->values[0].level == 0 &&
-    explorerDestination->explorationStack->values[0].node == 2 &&
-    explorerDestination->explorationStack->values[1].level == 0 &&
-    explorerDestination->explorationStack->values[1].node == 3;
+    explorerDestination->explorationStack->values[0].node == 3;
+    
+    GDExplorerRun(explorerSource, -1, NULL);
+    GDExplorerRun(explorerDestination, -1, NULL);
+    
+    GDExplorerRelease(explorerDestination);
     
   } else {
     
@@ -246,8 +250,38 @@ GDBool testWorkMove() {
   
   GDGraphRelease(graph);
   GDExplorerRelease(explorerSource);
-  GDExplorerRelease(explorerDestination);
+ 
+  return success;
   
+}
+
+GDBool testWorkMove2() {
+  
+  GDBool success = YES;
+  
+  GDGraphRef graph = GDGraphCreateEmpty(1);
+  
+  GDExplorerRef explorerSource = GDExplorerCreate(graph);
+  GDExplorerInitializeWork(explorerSource);
+
+  char * bytes;
+  unsigned long int lenght;
+  GDBool hasWork = GDExplorerGetWork(explorerSource, &bytes, &lenght);
+  if ( hasWork ) {
+    
+    success = NO;
+    
+  } else {
+    
+    success = YES;
+    
+  }
+  
+  GDExplorerRun(explorerSource, -1, NULL);
+
+  GDGraphRelease(graph);
+  GDExplorerRelease(explorerSource);
+
   return success;
   
 }
@@ -317,6 +351,12 @@ void GDExplorerDataDistributionTestsRun() {
     printf("Move 1.....OK\n");
   } else {
     printf("Move 1 .....failed\n");
+  }
+
+  if ( testWorkMove2() == YES ) {
+    printf("Move 2.....OK\n");
+  } else {
+    printf("Move 2 .....failed\n");
   }
 
   

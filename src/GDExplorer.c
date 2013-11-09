@@ -266,6 +266,9 @@ GDBool GDExplorerGetWork(GDExplorerRef explorer, char ** bytes, unsigned long in
     return NO;
   }
   
+  assert( stackSplited->count > 0 );
+  assert( stack->count > 0 );
+  
   GDTriangleListRef triangleListSplited = GDTriangleListCopy(explorer->triangleList);
   GDTriangleListPopMultiple(triangleListSplited, triangleListSplited->count - GDExplorationStackTop(stackSplited).level);
   GDTriangleListPopMultiple(explorer->triangleList, explorer->triangleList->count - GDExplorationStackTop(stack).level);
