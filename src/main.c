@@ -403,6 +403,7 @@ void receiveWork(){
 	int isWorkAvailable;
 	do {
 		checkToken();
+		checkWorkEnd();
 		if (shouldTerminate) return;
 		
 		
@@ -509,20 +510,27 @@ GDBool checkWorkEnd(){
 
 void finalize() {
 	
-		printf("Finalizing...\n");
+		
 	//receive all solutions, print best
 	
 	GDBool isMainWorker = myRank == 0;
 	if(isMainWorker){
+		printf("Finalizing...\n");
 		GDTriangleListRef *solutionTriangleLists = malloc((processCount -1) *sizeof(GDTriangleListRef));
 //		solutionTriangleLists[0] = explorer->bestSolution->triangleList;
 		for (int i = 1; i < processCount; i++) {
-			char *triangleListData = malloc(TRIANGLE_LIST_BUFFER_LENGTH  *sizeof(char));
+			char *triangleListData = malloc(TRIANGLE_LIST_BUFFER_LENGTH *sizeof(char));
 			MPI_Status solutionStatus;
-			MPI_Recv(&triangleListData, TRIANGLE_LIST_BUFFER_LENGTH, MPI_BYTE, i, SOLUTION_TAG, MPI_COMM_WORLD, &solutionStatus);
+			MPI_Recv(triangleListData, TRIANGLE_LIST_BUFFER_LENGTH, MPI_BYTE, i, SOLUTION_TAG, MPI_COMM_WORLD, &solutionStatus);
 			int actualLength = -1;
 			MPI_Get_count(&solutionStatus, MPI_BYTE, &actualLength);
-						printf("p%d received triangle list data of length %d from p%d\n", myRank, actualLength, solutionStatus.MPI_SOURCE);
+			
+			printf("p%d received triangle list data of length %d from p%d\n", myRank, actualLength, solutionStatus.MPI_SOURCE);
+			
+
+			
+
+			
 			if(actualLength > 1){
 				GDTriangleListRef triangleList = GDTriangleListCreateFromData(triangleListData, actualLength);
 				solutionTriangleLists[i-1] = triangleList;
@@ -546,15 +554,14 @@ void finalize() {
 		
 		
 		GDSolutionPrint(bestSolution);
-				MPI_Finalize();
 		
-//		for(int i = 0; i < processCount -1; i++){
-//			GDTriangleListRef triangleList = solutionTriangleLists[i];
-//			if(triangleList){
-//				GDTriangleListRelease(triangleList);
-//			}
-//		}
-//		free(solutionTriangleLists);
+		for(int i = 0; i < processCount -1; i++){
+			GDTriangleListRef triangleList = solutionTriangleLists[i];
+			if(triangleList){
+				GDTriangleListRelease(triangleList);
+			}
+		}
+		free(solutionTriangleLists);
 
 	}else{
 		if(explorer->bestSolution){
@@ -562,29 +569,14 @@ void finalize() {
 			char *bestLocalTriangleListData;
 			unsigned long length;
 			GDTriangleListGetData(bestLocalTriangleList, &bestLocalTriangleListData, &length);
-			printf("p%d sending triangle list data of length %d to p%d\n", myRank, length, 0);
+			printf("p%d sending triangle list data of length %d to p%d\n", myRank, (int)length, 0);
 			MPI_Send(bestLocalTriangleListData, (int)length, MPI_BYTE, 0, SOLUTION_TAG, MPI_COMM_WORLD);
-//			printf("before free in p%d \n", myRank);
-//			printf("%d\n", bestLocalTriangleListData);
-//			free(bestLocalTriangleListData);
+			free(bestLocalTriangleListData);
 		}else{
 			MPI_Send(&myRank, 1, MPI_BYTE, 0, SOLUTION_TAG, MPI_COMM_WORLD);
 		}
 	}
 	
-//	GDExplorerRelease(explorer);
-//	GDGraphRelease(graph);
-	
-	
-	/*
-	 
-	 TODO
-	 
-	 1. redukce a sbirani vysledku
-	 
-	 2. prezentace vysledku
-	 
-	 */
 	
 }
 
