@@ -23,9 +23,6 @@ typedef GDTriangleList * GDTriangleListRef;
 
 GDTriangleListRef GDTriangleListCreateWithCapacity(unsigned int initialCapcity, unsigned int totalNodesCount);
 
-/*
- * Edges usage is not implemented
- */
 GDTriangleListRef GDTriangleListCopy(GDTriangleListRef triangleList);
 
 void GDTriangleListRelease(GDTriangleListRef triangleList);
