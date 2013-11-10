@@ -200,7 +200,7 @@ GDBool isIdle = NO;
 GDBool shouldTerminate = NO;
 
 
-#define STACK_BUFFER_LENGTH 1024
+#define STACK_BUFFER_LENGTH 100000
 
 #pragma mark - Vars
 
@@ -253,7 +253,7 @@ void runLoop() {
 
 	
 		GDBool canExistBetterSolution;
-		printf("p%d running explorer\n", myRank);
+//		printf("p%d running explorer\n", myRank);
 		GDExplorerRun(explorer, EXPLORER_RUN_MAX_STEPS, &canExistBetterSolution);
 		GDBool hasWork = explorer->explorationStack->count > 0;
 		
@@ -278,8 +278,8 @@ void runLoop() {
 		
 	}
 	
-	printf("--------------------------------\n");
-	printf("p%d terminating runLoop\n", myRank);
+//	printf("--------------------------------\n");
+//	printf("p%d terminating runLoop\n", myRank);
 	
 	free(workBuffer);
 	free(sentWorks);
@@ -324,7 +324,7 @@ void checkIncomingWorkRequests() {
 			MPI_Recv(&dummyReceiveBuffer, 1, MPI_CHAR, workProbeStatus.MPI_SOURCE, workProbeStatus.MPI_TAG, MPI_COMM_WORLD, &status);
 			MPI_Get_count(&status, MPI_CHAR, &length);
 			int source = status.MPI_SOURCE;
-			printf("p%d received work request from p%d\n", myRank, source);
+//			printf("p%d received work request from p%d\n", myRank, source);
 			sendWork(source);
 		}
 	}while(flag);
@@ -347,7 +347,7 @@ void sendWork(int destination) {
 	SendWorkData sendWorkData;
 	GDBool hasWork = GDExplorerGetWork(explorer, &sendWorkData.buffer, &length);
 	if(hasWork){
-		printf("p%d sending work of length %d to p%d\n", myRank, (int)length, destination);
+//		printf("p%d sending work of length %d to p%d\n", myRank, (int)length, destination);
 		MPI_Isend(sendWorkData.buffer, (int)length, MPI_BYTE, destination, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &(sendWorkData.request));
 		//save sendWorkData struct for later release;
 		sentWorks[destination] = sendWorkData;
@@ -357,7 +357,7 @@ void sendWork(int destination) {
 			processColor = BLACK;
 		}
 	}else{
-		printf("p%d doesnt have enough work to share, informing p%d...\n", myRank, destination);
+//		printf("p%d doesnt have enough work to share, informing p%d...\n", myRank, destination);
 		MPI_Isend(&myRank, 1, MPI_BYTE, destination, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &(sendWorkData.request));
 	}
 	
@@ -373,11 +373,11 @@ void cleanUpSentWorks() {
 		int isRequestFinished;
 		MPI_Test(&(data->request), &isRequestFinished, MPI_STATUS_IGNORE);
 		if(isRequestFinished){
-			printf("p%d releasing buffer for sending data to p%d\n",myRank, i);
+//			printf("p%d releasing buffer for sending data to p%d\n",myRank, i);
 			SendWorkDataRelease(data);
 			data = NULL;
 		}else{
-			printf("p%d cant yet release buffer for sending data to p%d, request hasnt finished\n",myRank, i);
+//			printf("p%d cant yet release buffer for sending data to p%d, request hasnt finished\n",myRank, i);
 		}
 	}
 }
@@ -390,8 +390,11 @@ void askForWork() {
 	//room for optimization - at least dont ask the same process twice in a row
 	int destination;
 	destination = (myRank +1) %processCount;
+//	do {
+//		destination = rand()%processCount;
+//	} while (destination == myRank);
 	
-	printf("p%d asking p%d for work.\n", myRank, destination);
+//	printf("p%d asking p%d for work.\n", myRank, destination);
 	MPI_Send(&myRank, 1, MPI_CHAR, destination, WORK_REQUEST_TAG, MPI_COMM_WORLD);
 	//theres no point continuing until i have successfully asked for work
 	isIdle = YES;
@@ -404,6 +407,7 @@ void receiveWork(){
 	do {
 		checkToken();
 		checkWorkEnd();
+		checkIncomingWorkRequests();
 		if (shouldTerminate) return;
 		
 		
@@ -423,11 +427,11 @@ void receiveWork(){
 					return;
 				}
 				//ask someone else
-				printf("p%d didnt receive any work from p%d, asking again\n", myRank, workRequestStatus.MPI_SOURCE);
+//				printf("p%d didnt receive any work from p%d, asking again\n", myRank, workRequestStatus.MPI_SOURCE);
 				askForWork();
 			}else{
 				//		GDExplorationStackRef newStack = GDExplorationStackCreateFromData(workBuffer, count);
-				printf("p%d received work of length %d from p%d\n", myRank, count, workRequestStatus.MPI_SOURCE);
+//				printf("p%d received work of length %d from p%d\n", myRank, count, workRequestStatus.MPI_SOURCE);
 				GDExplorerSetWork(explorer, workBuffer, count);
 			}
 		}
@@ -458,7 +462,7 @@ void checkToken() {
 		MPI_Status tokenReceiveStatus;
 		MPI_Recv(&tokenColor, 1, MPI_BYTE, tokenProbeStatus.MPI_SOURCE, TOKEN_TAG, MPI_COMM_WORLD, &tokenReceiveStatus);
 		
-			printf("p%d received token of color %s from p%d\n", myRank, (tokenColor == WHITE)? "white" : "black", tokenReceiveStatus.MPI_SOURCE);
+//			printf("p%d received token of color %s from p%d\n", myRank, (tokenColor == WHITE)? "white" : "black", tokenReceiveStatus.MPI_SOURCE);
 		hasToken = YES;
 		
 		GDBool isMainWorker = myRank == 0;
@@ -484,7 +488,7 @@ void sendToken(){
 	if(isMainWorker){
 		tokenColor = WHITE;
 	}
-	printf("p%d sending token of color %s to p%d\n", myRank, (tokenColor == WHITE)? "white" : "black", destination);
+//	printf("p%d sending token of color %s to p%d\n", myRank, (tokenColor == WHITE)? "white" : "black", destination);
 	MPI_Send(&tokenColor, 1, MPI_BYTE, destination, TOKEN_TAG, MPI_COMM_WORLD);
 	hasToken = NO;
 	processColor = WHITE;
@@ -525,7 +529,7 @@ void finalize() {
 			int actualLength = -1;
 			MPI_Get_count(&solutionStatus, MPI_BYTE, &actualLength);
 			
-			printf("p%d received triangle list data of length %d from p%d\n", myRank, actualLength, solutionStatus.MPI_SOURCE);
+//			printf("p%d received triangle list data of length %d from p%d\n", myRank, actualLength, solutionStatus.MPI_SOURCE);
 			
 
 			
@@ -569,7 +573,7 @@ void finalize() {
 			char *bestLocalTriangleListData;
 			unsigned long length;
 			GDTriangleListGetData(bestLocalTriangleList, &bestLocalTriangleListData, &length);
-			printf("p%d sending triangle list data of length %d to p%d\n", myRank, (int)length, 0);
+//			printf("p%d sending triangle list data of length %d to p%d\n", myRank, (int)length, 0);
 			MPI_Send(bestLocalTriangleListData, (int)length, MPI_BYTE, 0, SOLUTION_TAG, MPI_COMM_WORLD);
 			free(bestLocalTriangleListData);
 		}else{
