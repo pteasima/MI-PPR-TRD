@@ -143,6 +143,7 @@ void initialize(const char * path) {
 		for (i = 1; i < processCount; i++) {
 			MPI_Send(graphData, (int)length, MPI_BYTE, i, GRAPH_TAG, MPI_COMM_WORLD);
 		}
+		free(graphData);
 	}else{
 		MPI_Status graphProbeStatus;
 		MPI_Probe(MPI_ANY_SOURCE, GRAPH_TAG, MPI_COMM_WORLD, &graphProbeStatus);
