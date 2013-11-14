@@ -112,7 +112,6 @@ int main(int argc, char * argv[]) {
 
 #define GRAPH_TAG 3
 
-#define GRAPH_BUFFER_LENGTH 1024
 
 
 #pragma mark - Init
@@ -145,13 +144,18 @@ void initialize(const char * path) {
 			MPI_Send(graphData, (int)length, MPI_BYTE, i, GRAPH_TAG, MPI_COMM_WORLD);
 		}
 	}else{
-		MPI_Status recvGraphStatus;
+		MPI_Status graphProbeStatus;
+		MPI_Probe(MPI_ANY_SOURCE, GRAPH_TAG, MPI_COMM_WORLD, &graphProbeStatus);
+		int count;
+		MPI_Get_count(&graphProbeStatus, MPI_BYTE, &count);
+
 		char *graphData;
-		graphData = malloc(GRAPH_BUFFER_LENGTH * sizeof(MPI_BYTE));
-		MPI_Recv(graphData, GRAPH_BUFFER_LENGTH, MPI_BYTE, MPI_ANY_SOURCE, GRAPH_TAG, MPI_COMM_WORLD, &recvGraphStatus);
-		int actualLength = -1;
-		MPI_Get_count(&recvGraphStatus, MPI_BYTE, &actualLength);
-		graph = GDGraphCreateFromData(graphData, actualLength);
+		graphData = malloc(count * sizeof(MPI_BYTE));
+		MPI_Recv(graphData, count, MPI_BYTE, MPI_ANY_SOURCE, GRAPH_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		
+
+		graph = GDGraphCreateFromData(graphData, count);
+		free(graphData);
 	}
 	
 	explorer = GDExplorerCreate(graph);
