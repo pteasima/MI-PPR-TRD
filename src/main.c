@@ -200,11 +200,9 @@ GDBool isIdle = NO;
 GDBool shouldTerminate = NO;
 
 
-#define STACK_BUFFER_LENGTH 100000
 
 #pragma mark - Vars
 
-char * workBuffer;
 
 typedef struct SendWorkData {
 	MPI_Request request;
@@ -235,8 +233,6 @@ void runLoop() {
 		sentWorks[i].request = NULL;
 		sentWorks[i].buffer = NULL;
 	}
-	
-	workBuffer = malloc(STACK_BUFFER_LENGTH * sizeof(MPI_BYTE));
 	
 	
 	GDBool isMainWorker = myRank == 0;
@@ -281,7 +277,6 @@ void runLoop() {
 //	printf("--------------------------------\n");
 //	printf("p%d terminating runLoop\n", myRank);
 	
-	free(workBuffer);
 	free(sentWorks);
 	
 	/*
@@ -415,25 +410,33 @@ void receiveWork(){
 		
 		MPI_Iprobe(MPI_ANY_SOURCE, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &isWorkAvailable, &workProbeStatus);
 		if(isWorkAvailable){
-			
-			MPI_Status workRequestStatus;
-			//blocking receive - new work or message of length 0
-			MPI_Recv(workBuffer, STACK_BUFFER_LENGTH, MPI_BYTE, workProbeStatus.MPI_SOURCE, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &workRequestStatus);
 			int count = 0;
-			MPI_Get_count(&workRequestStatus, MPI_BYTE, &count);
+			MPI_Get_count(&workProbeStatus, MPI_BYTE, &count);
 			//no work received, check work end
 			if(count == 1){
+				char dummyByte;
+				char *dummyBuffer = &dummyByte;
+				MPI_Recv(dummyBuffer, count, MPI_BYTE, workProbeStatus.MPI_SOURCE, WORK_RESPONSE_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 				if(checkWorkEnd()){
 					return;
 				}
 				//ask someone else
-//				printf("p%d didnt receive any work from p%d, asking again\n", myRank, workRequestStatus.MPI_SOURCE);
+				//				printf("p%d didnt receive any work from p%d, asking again\n", myRank, workRequestStatus.MPI_SOURCE);
 				askForWork();
+			
+			
+
 			}else{
-				//		GDExplorationStackRef newStack = GDExplorationStackCreateFromData(workBuffer, count);
-//				printf("p%d received work of length %d from p%d\n", myRank, count, workRequestStatus.MPI_SOURCE);
+				char *workBuffer = malloc(count * sizeof(char));
+				MPI_Status workRequestStatus;
+				//blocking receive - new work or message of length 0
+				MPI_Recv(workBuffer, count, MPI_BYTE, workProbeStatus.MPI_SOURCE, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &workRequestStatus);
+				
+				
 				GDExplorerSetWork(explorer, workBuffer, count);
+				free(workBuffer);
 			}
+			
 		}
 		
 	} while (!isWorkAvailable);
