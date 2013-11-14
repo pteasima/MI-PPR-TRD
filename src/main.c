@@ -516,7 +516,7 @@ GDBool checkWorkEnd(){
 
 #pragma mark - Finish
 
-#define TRIANGLE_LIST_BUFFER_LENGTH 1024
+
 
 #define SOLUTION_TAG 5
 
@@ -531,24 +531,28 @@ void finalize() {
 		GDTriangleListRef *solutionTriangleLists = malloc((processCount -1) *sizeof(GDTriangleListRef));
 //		solutionTriangleLists[0] = explorer->bestSolution->triangleList;
 		for (int i = 1; i < processCount; i++) {
-			char *triangleListData = malloc(TRIANGLE_LIST_BUFFER_LENGTH *sizeof(char));
-			MPI_Status solutionStatus;
-			MPI_Recv(triangleListData, TRIANGLE_LIST_BUFFER_LENGTH, MPI_BYTE, i, SOLUTION_TAG, MPI_COMM_WORLD, &solutionStatus);
-			int actualLength = -1;
-			MPI_Get_count(&solutionStatus, MPI_BYTE, &actualLength);
+			MPI_Status solutionProbeStatus;
+			MPI_Probe(i, SOLUTION_TAG, MPI_COMM_WORLD, &solutionProbeStatus);
+
+			int count;
+			MPI_Get_count(&solutionProbeStatus, MPI_BYTE, &count);
+						char *triangleListData = malloc(count *sizeof(char));
+			MPI_Recv(triangleListData, count, MPI_BYTE, i, SOLUTION_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+
 			
-//			printf("p%d received triangle list data of length %d from p%d\n", myRank, actualLength, solutionStatus.MPI_SOURCE);
 			
 
 			
 
 			
-			if(actualLength > 1){
-				GDTriangleListRef triangleList = GDTriangleListCreateFromData(triangleListData, actualLength);
+			if(count > 1){
+				GDTriangleListRef triangleList = GDTriangleListCreateFromData(triangleListData, count);
 				solutionTriangleLists[i-1] = triangleList;
 			}else{
 				solutionTriangleLists[i-1] = NULL;
 			}
+			free(triangleListData);
 		}
 		GDTriangleListRef bestTriangleList = explorer->bestSolution->triangleList;
 		for(int i = 0; i < processCount-1; i++){
