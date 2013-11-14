@@ -321,7 +321,6 @@ void runLoop() {
 #pragma mark - Check Work Request
 
 void checkIncomingWorkRequests() {
-	
 	//reads all pending work requests sequentially and responds to each
 	int flag = 0;
 	do{
@@ -329,6 +328,7 @@ void checkIncomingWorkRequests() {
 		MPI_Iprobe(MPI_ANY_SOURCE, WORK_REQUEST_TAG, MPI_COMM_WORLD, &flag, &workProbeStatus);
 		
 		if(flag){
+//			printf("p%d found a pending work request from p%d\n", myRank, workProbeStatus.MPI_SOURCE);
 			int length = 0;
 			MPI_Status status;
 			char dummyReceiveBuffer;
@@ -533,6 +533,8 @@ GDBool checkWorkEnd(){
 
 void finalize() {
 	
+//	printf("p%d finalizing\n" , myRank);
+	
 	if(processCount > 1){
 		//receive all solutions, print best
 		
@@ -547,23 +549,21 @@ void finalize() {
 				
 				int count;
 				MPI_Get_count(&solutionProbeStatus, MPI_BYTE, &count);
-				char *triangleListData = malloc(count *sizeof(char));
-				MPI_Recv(triangleListData, count, MPI_BYTE, i, SOLUTION_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-				
-				
-				
-				
-				
-				
-				
-				
 				if(count > 1){
+					char *triangleListData = malloc(count *sizeof(char));
+					MPI_Recv(triangleListData, count, MPI_BYTE, i, SOLUTION_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+					printf("p%d received triangle list of length %d from %d\n", myRank, count, solutionProbeStatus.MPI_SOURCE);
 					GDTriangleListRef triangleList = GDTriangleListCreateFromData(triangleListData, count);
 					solutionTriangleLists[i-1] = triangleList;
+									free(triangleListData);
 				}else{
+					char dummyByte;
+					char *dummyBuffer = &dummyByte;
+					MPI_Recv(dummyBuffer, 1, MPI_BYTE, solutionProbeStatus.MPI_SOURCE, SOLUTION_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+					printf("p%d received no solution from p%d\n", myRank, solutionProbeStatus.MPI_SOURCE);
 					solutionTriangleLists[i-1] = NULL;
 				}
-				free(triangleListData);
+
 			}
 			GDTriangleListRef bestTriangleList = explorer->bestSolution->triangleList;
 			for(int i = 0; i < processCount-1; i++){
@@ -578,8 +578,6 @@ void finalize() {
 			}else{
 				bestSolution = GDSolutionCreate(graph, bestTriangleList);
 			}
-			
-			
 			GDSolutionPrint(bestSolution);
 			
 			for(int i = 0; i < processCount -1; i++){
