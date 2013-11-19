@@ -56,7 +56,7 @@ void finalize();
 
 #pragma mark - Constants
 
-#define EXPLORER_RUN_MAX_STEPS 10000
+#define EXPLORER_RUN_MAX_STEPS 500
 
 
 #pragma mark - Vars
@@ -80,6 +80,8 @@ int main(int argc, char * argv[]) {
 	MPI_Init(&argc, &argv);
 	//		sleep(3);
 	
+	double t1 = MPI_Wtime();
+	
 	const char * path = argv[1];
 	
 	initialize(path);
@@ -90,16 +92,16 @@ int main(int argc, char * argv[]) {
 	
 	GDGraphRelease(graph);
 	
-	//buffery pevne velikosti alokovane v initialize(), odstranit pokud vyresim alokaci bufferu pred kazdym recv
-	//	free(graphBuffer);
 	
 	
+	double t2 = MPI_Wtime();
 	//finalize MPI
 	MPI_Finalize();
-	//
-	//#warning <#message#>
-	//  GDExplorerDataDistributionTestsRun();
-	//  GDAlgorithmTestsRun();
+	
+	if(myRank == 0 ){
+		printf("%lf", t2-t1);
+	}
+	
 	
 	return 0;
 	
@@ -120,6 +122,7 @@ void initialize(const char * path) {
 	//init MPI
 	MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 	MPI_Comm_size(MPI_COMM_WORLD, &processCount);
+	
 	
 	//TODO determine correct buffer sizes.
 	
@@ -165,12 +168,12 @@ void initialize(const char * path) {
 	
 	
 	if(myRank == 0){
-		printf("Initializing...\n");
+//		printf("Initializing...\n");
 		GDExplorerInitializeWork(explorer);
 	}
 	//wait until all processes have received graph and p0 has initialized its stack
 
-	if(myRank == 0 && processCount >1) printf("processes can now ask for work.\n");
+//	if(myRank == 0 && processCount >1) printf("processes can now ask for work.\n");
 	MPI_Barrier(MPI_COMM_WORLD);
 	/*
 	 
@@ -247,7 +250,7 @@ void runLoop() {
 	GDBool isMainWorker = myRank == 0;
 	
 	if ( isMainWorker ){
-		printf("Finding best solution...\n");
+//		printf("Finding best solution...\n");
 		
 		hasToken = YES;
 	}else{
@@ -464,8 +467,8 @@ void receiveWork(){
 
 void terminateWork(){
 	shouldTerminate = YES;
-	printf("----------------------------------------------------------------\n");
-	printf ("p%d decided to terminate work, informing others..\n", myRank);
+//	printf("----------------------------------------------------------------\n");
+//	printf ("p%d decided to terminate work, informing others..\n", myRank);
 	for (int i = 0; i < processCount; i++){
 		if(i == myRank) continue;
 		MPI_Send(&myRank, 1, MPI_INT, i, END_WORK_TAG, MPI_COMM_WORLD);
@@ -540,7 +543,7 @@ void finalize() {
 		
 		GDBool isMainWorker = myRank == 0;
 		if(isMainWorker){
-			printf("Finalizing...\n");
+//			printf("Finalizing...\n");
 			GDTriangleListRef *solutionTriangleLists = malloc((processCount -1) *sizeof(GDTriangleListRef));
 			//		solutionTriangleLists[0] = explorer->bestSolution->triangleList;
 			for (int i = 1; i < processCount; i++) {
@@ -552,7 +555,7 @@ void finalize() {
 				if(count > 1){
 					char *triangleListData = malloc(count *sizeof(char));
 					MPI_Recv(triangleListData, count, MPI_BYTE, i, SOLUTION_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-					printf("p%d received triangle list of length %d from %d\n", myRank, count, solutionProbeStatus.MPI_SOURCE);
+//					printf("p%d received triangle list of length %d from %d\n", myRank, count, solutionProbeStatus.MPI_SOURCE);
 					GDTriangleListRef triangleList = GDTriangleListCreateFromData(triangleListData, count);
 					solutionTriangleLists[i-1] = triangleList;
 									free(triangleListData);
@@ -560,7 +563,7 @@ void finalize() {
 					char dummyByte;
 					char *dummyBuffer = &dummyByte;
 					MPI_Recv(dummyBuffer, 1, MPI_BYTE, solutionProbeStatus.MPI_SOURCE, SOLUTION_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-					printf("p%d received no solution from p%d\n", myRank, solutionProbeStatus.MPI_SOURCE);
+//					printf("p%d received no solution from p%d\n", myRank, solutionProbeStatus.MPI_SOURCE);
 					solutionTriangleLists[i-1] = NULL;
 				}
 
@@ -586,7 +589,7 @@ void finalize() {
 			}
 				
 
-			GDSolutionPrint(bestSolution);
+//			GDSolutionPrint(bestSolution);
 			
 			for(int i = 0; i < processCount -1; i++){
 				GDTriangleListRef triangleList = solutionTriangleLists[i];
@@ -610,7 +613,7 @@ void finalize() {
 			}
 		}
 	}else{
-		GDSolutionPrint(explorer->bestSolution);
+//		GDSolutionPrint(explorer->bestSolution);
 	}
 	
 	
