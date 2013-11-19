@@ -565,10 +565,13 @@ void finalize() {
 				}
 
 			}
-			GDTriangleListRef bestTriangleList = explorer->bestSolution->triangleList;
+			GDTriangleListRef bestTriangleList =NULL;
+			if(explorer->bestSolution){
+				bestTriangleList = explorer->bestSolution->triangleList;
+			}
 			for(int i = 0; i < processCount-1; i++){
 				GDTriangleListRef triangleList = solutionTriangleLists[i];
-				if(triangleList && triangleList->count > bestTriangleList->count){
+				if(bestTriangleList || (triangleList && triangleList->count > bestTriangleList->count)){
 					bestTriangleList = triangleList;
 				}
 			}
