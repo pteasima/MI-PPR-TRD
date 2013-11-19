@@ -56,7 +56,7 @@ void finalize();
 
 #pragma mark - Constants
 
-#define EXPLORER_RUN_MAX_STEPS 2000
+#define EXPLORER_RUN_MAX_STEPS 20000
 
 
 #pragma mark - Vars
@@ -572,11 +572,14 @@ void finalize() {
 					bestTriangleList = triangleList;
 				}
 			}
-			GDSolutionRef bestSolution ;
-			if(bestTriangleList == explorer->bestSolution->triangleList){
-				bestSolution = explorer->bestSolution;
-			}else{
-				bestSolution = GDSolutionCreate(graph, bestTriangleList);
+			GDSolutionRef bestSolution = NULL;
+			//have best solution
+			if(bestTriangleList){
+				if(bestTriangleList == explorer->bestSolution->triangleList){
+					bestSolution = explorer->bestSolution;
+				}else{
+					bestSolution = GDSolutionCreate(graph, bestTriangleList);
+				}
 			}
 			GDSolutionPrint(bestSolution);
 			
