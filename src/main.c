@@ -56,7 +56,7 @@ void finalize();
 
 #pragma mark - Constants
 
-#define EXPLORER_RUN_MAX_STEPS 20000
+#define EXPLORER_RUN_MAX_STEPS 10000
 
 
 #pragma mark - Vars
