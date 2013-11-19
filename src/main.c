@@ -571,11 +571,11 @@ void finalize() {
 			}
 			for(int i = 0; i < processCount-1; i++){
 				GDTriangleListRef triangleList = solutionTriangleLists[i];
-				if(bestTriangleList || (triangleList && triangleList->count > bestTriangleList->count)){
+				if(!bestTriangleList || (triangleList && triangleList->count > bestTriangleList->count)){
 					bestTriangleList = triangleList;
 				}
 			}
-			GDSolutionRef bestSolution = NULL;
+			GDSolutionRef bestSolution =NULL;
 			//have best solution
 			if(bestTriangleList){
 				if(bestTriangleList == explorer->bestSolution->triangleList){
@@ -584,6 +584,8 @@ void finalize() {
 					bestSolution = GDSolutionCreate(graph, bestTriangleList);
 				}
 			}
+				
+
 			GDSolutionPrint(bestSolution);
 			
 			for(int i = 0; i < processCount -1; i++){
