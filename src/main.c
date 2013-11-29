@@ -260,7 +260,7 @@ void runLoop() {
 
 	
 		GDBool canExistBetterSolution;
-		printf("p%d running explorer\n", myRank);
+		printf("p%d running explorer, current stack lenght = %d\n", myRank, explorer->explorationStack->count);
 		GDExplorerRun(explorer, EXPLORER_RUN_MAX_STEPS, &canExistBetterSolution);
 		GDBool hasWork = explorer->explorationStack->count > 0;
 		
