@@ -99,7 +99,7 @@ int main(int argc, char * argv[]) {
 	MPI_Finalize();
 	
 	if(myRank == 0 ){
-		printf("%lf", t2-t1);
+		printf("%lf\n", t2-t1);
 	}
 	
 	
@@ -122,7 +122,6 @@ void initialize(const char * path) {
 	//init MPI
 	MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 	MPI_Comm_size(MPI_COMM_WORLD, &processCount);
-	
 	
 	//TODO determine correct buffer sizes.
 	
@@ -261,7 +260,7 @@ void runLoop() {
 
 	
 		GDBool canExistBetterSolution;
-//		printf("p%d running explorer\n", myRank);
+		printf("p%d running explorer\n", myRank);
 		GDExplorerRun(explorer, EXPLORER_RUN_MAX_STEPS, &canExistBetterSolution);
 		GDBool hasWork = explorer->explorationStack->count > 0;
 		
@@ -408,7 +407,7 @@ void askForWork() {
 //		destination = rand()%processCount;
 //	} while (destination == myRank);
 	
-//	printf("p%d asking p%d for work.\n", myRank, destination);
+	printf("p%d asking p%d for work.\n", myRank, destination);
 	MPI_Send(&myRank, 1, MPI_CHAR, destination, WORK_REQUEST_TAG, MPI_COMM_WORLD);
 	//theres no point continuing until i have successfully asked for work
 	isIdle = YES;
@@ -440,7 +439,7 @@ void receiveWork(){
 					return;
 				}
 				//ask someone else
-				//				printf("p%d didnt receive any work from p%d, asking again\n", myRank, workRequestStatus.MPI_SOURCE);
+				printf("p%d didnt receive any work from p%d, asking again\n", myRank, workProbeStatus.MPI_SOURCE);
 				askForWork();
 			
 			
@@ -450,7 +449,8 @@ void receiveWork(){
 				MPI_Status workRequestStatus;
 				//blocking receive - new work or message of length 0
 				MPI_Recv(workBuffer, count, MPI_BYTE, workProbeStatus.MPI_SOURCE, WORK_RESPONSE_TAG, MPI_COMM_WORLD, &workRequestStatus);
-				
+				printf("p%d received work of length %d from p%d\n", myRank, count, workProbeStatus.MPI_SOURCE);
+
 				
 				GDExplorerSetWork(explorer, workBuffer, count);
 				free(workBuffer);
@@ -555,7 +555,7 @@ void finalize() {
 				if(count > 1){
 					char *triangleListData = malloc(count *sizeof(char));
 					MPI_Recv(triangleListData, count, MPI_BYTE, i, SOLUTION_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-//					printf("p%d received triangle list of length %d from %d\n", myRank, count, solutionProbeStatus.MPI_SOURCE);
+					printf("p%d received triangle list of length %d from %d\n", myRank, count, solutionProbeStatus.MPI_SOURCE);
 					GDTriangleListRef triangleList = GDTriangleListCreateFromData(triangleListData, count);
 					solutionTriangleLists[i-1] = triangleList;
 									free(triangleListData);
@@ -563,7 +563,7 @@ void finalize() {
 					char dummyByte;
 					char *dummyBuffer = &dummyByte;
 					MPI_Recv(dummyBuffer, 1, MPI_BYTE, solutionProbeStatus.MPI_SOURCE, SOLUTION_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-//					printf("p%d received no solution from p%d\n", myRank, solutionProbeStatus.MPI_SOURCE);
+					printf("p%d received no solution from p%d\n", myRank, solutionProbeStatus.MPI_SOURCE);
 					solutionTriangleLists[i-1] = NULL;
 				}
 
@@ -589,7 +589,7 @@ void finalize() {
 			}
 				
 
-//			GDSolutionPrint(bestSolution);
+			GDSolutionPrint(bestSolution);
 			
 			for(int i = 0; i < processCount -1; i++){
 				GDTriangleListRef triangleList = solutionTriangleLists[i];
@@ -613,11 +613,8 @@ void finalize() {
 			}
 		}
 	}else{
-//		GDSolutionPrint(explorer->bestSolution);
+		GDSolutionPrint(explorer->bestSolution);
 	}
-	
-	
-	
 }
 
 
